@@ -1,0 +1,25 @@
+{% extends 'accounts/main.html' %} 
+
+{% block content %}	
+{% if request.user.is_staff %}
+<p>{{form.teacher}}<p>
+{% endif %}	
+<br>
+<div class="row">
+	<div class="col-md">
+		<div class="card card-body">
+
+			<form action="" method="POST">
+				{% csrf_token %}
+				<p>{{form.teacher}}</p>
+				<p>{{form.date.label_tag}}{{form.date}}     {{form.category.label_tag}}{{form.category}}</p>
+				<p>{{form.ceu.label_tag}}{{form.ceu}}		{{form.clock_Hours.label_tag}}{{form.clock_Hours}}		{{form.pages.label_tag}}{{form.pages}}</p>
+				<p>{{form.summary.label_tag}}{{form.summary}}</p>
+
+				<input type="submit" value="Submit">
+			</form>
+		</div>
+	</div>
+</div>
+
+{% endblock %}

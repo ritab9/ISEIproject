@@ -1,0 +1,68 @@
+{% extends 'accounts/main.html' %} 
+
+{% block content %}	
+
+<div class="row">
+	<div class="col">
+		<div class="card card-body">
+			<form method="get">
+				{{myFilter.form}}
+		    	<button class="btn btn-primary" type="submit">Search</button>
+		  	</form>
+		</div>
+	</div>
+</div>
+
+<div class="col-md-11">
+		<hr>
+		<div class="card card-body">
+			<a class="btn btn-default  btn-sm btn-block" href="create_activity">Create Activity</a>
+
+<br>
+
+			<table class="table table-sm">
+				<tr>
+					<th>Teacher</th>
+					<th>Activity Type</th>
+					<th>Date </th>
+					<th>ceu</th>
+					<th>clock_Hours</th>
+					<th>pages</th>
+					<th>CEUs</th>
+					<th>Summary</th>	
+					<th>Update</th>
+					<th>Remove</th>
+				</tr>			
+				{% for activity in activities %}
+					<tr>
+						<td>{{activity.teacher}} </td>
+						<td>{{activity.category.get_category_display}} </td>
+						<td>{{activity.date}} </td>
+						<td>{{activity.ceu}} </td>
+						<td>{{activity.clock_Hours}} </td>
+						<td>{{activity.pages}} </td>
+						<td>{{activity.CEUs}} </td>
+						<td>{{activity.summary}} </td>
+						<td><a class = "btn btn-sm btn-info" href="{% url 'update_activity' activity.id %}">Update</a></td>
+						<td><a class = "btn btn-sm btn-danger" href="{% url 'delete_activity' activity.id %}">Delete</a></td>
+					</tr>	
+
+				{% endfor %}
+			</table>
+		</div>
+	</div>
+
+<div class="col">
+		<div class="col-md-5">
+			<div class="card text-center text-black  mb-3" id="orders-pending">
+			  	<div class="card-header">
+			  		<h8 class="card-title">Total Activities</h8>
+			  	</div>
+			  	<div class="card-body">
+			    	<h8 class="card-title">{{total_activities}}</h8>
+			  	</div>
+			</div>
+		</div>
+	</div>
+
+{% endblock %}

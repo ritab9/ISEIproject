@@ -1,0 +1,31 @@
+{% extends 'accounts/main.html' %} 
+
+{% block content %}	
+
+
+<div class="row">
+	<div class="col-md">
+		<div class="card card-body">
+			<h5>{{teacher}}</h5>
+			<!--
+			<hr>
+			<a class="btn btn-outline-info  btn-sm btn-block" href="">Update Teacher</a>
+			<a class="btn btn-outline-danger  btn-sm btn-block" href="">Delete Teacher</a>
+			-->
+		</div>
+	</div>
+
+	<div class="col-md">
+		<div class="card card-body">
+			<h5>Contact Information</h5>
+			<hr>
+			<p>Email: {{teacher.user.email}} </p>
+			<p>Phone: {{teacher.phone}}</p>
+		</div>
+	</div>
+
+	
+</div>
+
+
+{% endblock  %}
