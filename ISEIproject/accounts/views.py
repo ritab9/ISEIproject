@@ -239,7 +239,14 @@ def createUserActivity(request, pk):
 		formset = ActivityFormSet(request.POST, instance = teacher)
 		if formset.is_valid():
 			formset.save()
-			return redirect('/myactivities')
+			if request.user.groups.exists():
+				group = request.user.groups.all()[0].name
+				if group == 'teacher':
+					# teacher landing page
+					return redirect('/myactivities')
+				else:
+					# admin landing page
+					return redirect('activities')
 
 	context={'teacher':teacher,'formset':formset}
 	return render(request, "accounts/activityuser_form.html",context)

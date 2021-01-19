@@ -1,8 +1,10 @@
 {% extends 'accounts/main.html' %} 
 
 {% block content %}	
+{% if request.user.is_staff %}
+<p>{{teacher}}<p>
+{% endif %}
 
-{{teacher}}
 <br>
 <div class="row">
 	<div class="col-md">
@@ -26,5 +28,7 @@
 		</div>
 	</div>
 </div>
-
+    <script>
+        document.getElementById("teacher").style.display = "none";
+    </script>
 {% endblock %}
