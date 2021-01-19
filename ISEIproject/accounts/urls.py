@@ -6,19 +6,19 @@ from . import views
 
 urlpatterns = [
 
-	path('register/', views.registerPage, name = 'register'),
-	path('login/', views.loginPage, name = 'login'),
-	path('logout/', views.logoutUser, name = 'logout'),
+	path('register/', views.registerpage, name ='register'),
+	path('login/', views.loginpage, name ='login'),
+	path('logout/', views.logoutuser, name ='logout'),
 
     path('', views.home, name ="home"),
-    path('user/', views.UserPage, name='user_page'),
-    path('account/', views.accountSettings, name='account'),
-    path('myactivities/', views.myActivities, name='myactivities'),
+    path('user/', views.userpage, name='user_page'),
+    path('account/', views.accountsettings, name='account'),
+    path('myactivities/', views.myactivities, name='myactivities'),
 
     path('activities/', views.activities, name ="activities"),
     path('teachers/', views.teachers, name ="teachers"),
     path('teacher/<str:pk>/', views.teacher, name ="teacher"),
-	path('activities/create_activity/', views.createActivity, name="create_activity"),
+	path('activities/create_activity/', views.createactivity, name="create_activity"),
 
 	# pk is the activity ID
     path('activities/update_activity/<str:pk>/', views.updateActivity, name="update_activity"),

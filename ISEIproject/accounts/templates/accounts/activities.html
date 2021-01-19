@@ -1,12 +1,12 @@
 {% extends 'accounts/main.html' %} 
-
+{% load crispy_forms_tags %}
 {% block content %}	
 
 <div class="row">
 	<div class="col">
 		<div class="card card-body">
 			<form method="get">
-				{{myFilter.form}}
+				{{my_filter.form}}
 		    	<button class="btn btn-primary" type="submit">Search</button>
 		  	</form>
 		</div>

@@ -5,7 +5,7 @@ body {
       background-color: #EFEFEF;
     }
 a, h1,h2 {
-    color: #4D6D9A;
+    color: #FFCE00;
  }
 
 
@@ -13,7 +13,7 @@ a, h1,h2 {
       width: 350px;
       margin-top: 20px;
       margin-bottom: auto;
-      background: #99CED3;
+      background: #508CBB;
       position: relative;
       display: flex;
       justify-content: center;
@@ -32,13 +32,13 @@ a, h1,h2 {
     }
 
 #form-title{
-      color: #4D6D9A;
-      
+      color: #053A64;
+
     }
 
 .login_btn {
       width: 100%;
-      background: #4D6D9A !important;
+      background: #053A64 !important;
       color: white !important;
     }
 .login_btn:focus {
@@ -49,7 +49,7 @@ a, h1,h2 {
       padding: 0 2rem;
     }
 .input-group-text {
-      background: #4D6D9A !important;
+      background: #053A64 !important;
       color: white !important;
       border: 0 !important;
       border-radius: 0.25rem 0 0 0.25rem !important;
@@ -66,18 +66,13 @@ a, h1,h2 {
       padding: 10px;
       margin-top: 10px;
     }
-.sidebar-nav {
-    margin-top:  20px;
-    padding: 0;
-    list-style: none;
-    background-color: ;
-}
+
 
 .col-sm-2 {
-  background:;
-  
+  background: linen;
+
 }
 
 .col-sm-10 {
-  background:;
+  background:linen;
 }

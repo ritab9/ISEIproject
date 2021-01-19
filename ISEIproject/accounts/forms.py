@@ -23,6 +23,9 @@ class TeacherForm(ModelForm):
 		model = Teacher
 		fields = '__all__'
 		exclude = ['user']
+		widgets = {
+				'profile_pic': forms.FileInput,
+				}
 
 class ActivityForm(ModelForm):
 	#readonly_field = ['teacher']

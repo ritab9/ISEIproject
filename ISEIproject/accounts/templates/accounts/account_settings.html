@@ -1,5 +1,7 @@
 {%  extends 'accounts/main.html' %}
 {% load static %}
+{% load crispy_forms_tags %}
+
 {% block content %}
 
 <style>
@@ -25,11 +27,37 @@
 	</div>
 	<div class="col-md-9">
 		<div class="card card-body">
-			
+			{% load crispy_forms_tags %}
 			<form method="POST" action="" enctype="multipart/form-data">
 				{% csrf_token %}
-				{{user_form.as_p}}
-				{{teacher_form.as_p}}
+                <div class="row">
+                    <div class="col-2">
+                        {{ user_form.first_name|as_crispy_field }}
+                    </div>
+                    <div class="col-2">
+                        {{ user_form.last_name|as_crispy_field }}
+                    </div>
+                    <div class="col-3">
+                        {{ user_form.email|as_crispy_field }}
+                    </div>
+                    <div class="col-3">
+                        {{ teacher_form.phone|as_crispy_field }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-2">
+                        {{ teacher_form.current_certification|as_crispy_field }}
+                    </div>
+                    <div class="col-3">
+                        {{ teacher_form.school|as_crispy_field }}
+                    </div>
+
+                </div>
+                <div class="row">
+                    <div class="col-3">
+                        {{ teacher_form.profile_pic|as_crispy_field }}
+                    </div>
+                </div>
 			<input class="btn btn-primary" type="submit" value="Update Information">
 			</form>
 		</div>
