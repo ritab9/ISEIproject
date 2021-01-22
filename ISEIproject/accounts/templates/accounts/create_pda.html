@@ -1,0 +1,14 @@
+{% extends 'accounts/main.html' %}
+{% load crispy_forms_tags %}
+{% block content %}
+
+<form action=" " method="POST" >
+
+{% csrf_token %}
+    {{ teacher }}
+{{ pdarecord_form.as_p }}
+{{ pdainstance_formset.as_p }}
+<input type="submit" value="submit">
+</form>
+
+{% endblock %}

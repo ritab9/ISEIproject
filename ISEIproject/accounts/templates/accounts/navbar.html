@@ -19,7 +19,7 @@
     <ul class="navbar-nav">
       {% if request.user.is_staff %}
           <li class="nav-item active">
-            <a class="nav-link" href="{% url 'home' %}">Home </a>
+            <a class="nav-link" href="{% url 'admin_dashboard' %}">Home </a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="{% url 'teachers' %}">Teachers</a>
@@ -29,13 +29,14 @@
           </li>
       {% else %}
            <li class="nav-item active">
-            <a class="nav-link" href="{% url 'user_page' %}">Home </a>
+            <a class="nav-link" href="{% url 'teacher_dashboard' %}">Home </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'myactivities' %}">My Activities</a>
+            <a class="nav-link" href="{% url 'create_pda' request.user.id %}">Enter PDAs</a>
           </li>
+
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'account' %}">Settings</a>
+            <a class="nav-link" href="{% url 'account_settings' %}">Settings</a>
           </li>
       {% endif %}
     </ul>

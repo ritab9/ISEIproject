@@ -1,19 +1,15 @@
-from django.shortcuts import render, redirect
-from django.http import HttpResponse
-from django.forms import inlineformset_factory
-from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import Group
+from django.forms import inlineformset_factory
+from django.shortcuts import render, redirect
 
-from .models import *
-from .forms import *
-from .filters import *
 from .decorators import unauthenticated_user, allowed_users, admin_only
+from .filters import *
+from .forms import *
 
 
-# Create your views here.
+# authentication functions
 @unauthenticated_user
 def registerpage(request):
     form = CreateUserForm()
@@ -22,11 +18,9 @@ def registerpage(request):
         if form.is_valid():
             form.save()
             username = form.cleaned_data.get('username')
-
             # flash message (only appears once)
             messages.success(request, 'Account was created for ' + username)
             return redirect('login')
-
     context = {'form': form}
     return render(request, 'accounts/register.html', context)
 
@@ -40,18 +34,18 @@ def loginpage(request):
 
         if user is not None:
             login(request, user)
-            # for new users go to account page
-            if user.date_joined.date() == user.last_login.date():
-                return redirect('account')
-            else:
-                if request.user.groups.exists():
-                    group = request.user.groups.all()[0].name
-                    if group == 'teacher':
-                        # teacher landing page
-                        return redirect('user_page')
+
+            if request.user.groups.exists():
+                group = request.user.groups.all()[0].name
+                if group == 'teacher':
+                    # for new users go to account page
+                    if user.date_joined.date() == user.last_login.date():
+                        return redirect('account_settings')
                     else:
-                        # admin landing page
-                        return redirect('home')
+                        return redirect('teacher_dashboard')
+                else:
+                    # admin landing page
+                    return redirect('admin_dashboard')
         else:
             messages.info(request, 'Username OR password is incorrect')
 
@@ -64,19 +58,92 @@ def logoutuser(request):
     return redirect('login')
 
 
-# this should be changed... it's pretty useless
 @login_required(login_url='login')
-@admin_only
-def home(request):
+@allowed_users(allowed_roles=['admin'])
+def admindashboard(request):
     teachers = Teacher.objects.all()
-    activities = Activity.objects.all()
+    # TODO redo the dashboard, replace activity references
+    activities = PDAInstance.objects.all()
 
     total_teachers = teachers.count()
     total_activities = activities.count()
 
     context = {'teachers': teachers, 'activities': activities, 'total_teachers': total_teachers,
                'total_activities': total_activities}
-    return render(request, 'accounts/home.html', context)
+    return render(request, 'accounts/admin_dashboard.html', context)
+
+
+@login_required(login_url='login')
+@allowed_users(allowed_roles=['teacher'])
+def teacherdashboard(request):
+    # TODO teacher dashboard
+    teacher = request.user.teacher
+    context = {'teacher': teacher}
+    return render(request, 'accounts/teacher_dashboard..html', context)
+
+
+@login_required(login_url='login')
+@allowed_users(allowed_roles=['teacher'])
+def accountsettings(request):
+    # TODO account settings for different categories of users
+    if request.method == 'POST':
+        user_form = UserForm(request.POST, instance=request.user)
+        teacher_form = TeacherForm(request.POST, request.FILES or None, instance=request.user.teacher)
+        if user_form.is_valid() and teacher_form.is_valid():
+            user_form.save()
+            teacher_form.save()
+            messages.success(request, 'Your profile was successfully updated!')
+            return redirect('account_settings')
+        else:
+            messages.error(request, 'Please correct the error below.')
+    else:
+        user_form = UserForm(instance=request.user)
+        teacher_form = TeacherForm(instance=request.user.teacher)
+    return render(request, 'accounts/account_settings.html', {
+        'user_form': user_form,
+        'teacher_form': teacher_form
+    })
+
+
+# create activity record and instances (for teacher with matching pk)
+@login_required(login_url='login')
+@allowed_users(allowed_roles=['admin', 'teacher'])
+def createpdarecord(request, pk):
+    user = User.objects.get(id=pk)
+    teacher = Teacher.objects.get(user=user)
+    pdarecord = PDARecord()
+    pdarecord.teacher = teacher
+    pdarecord_form = PDARecordForm(instance=pdarecord)
+
+
+    PDAInstanceFormSet = inlineformset_factory(PDARecord, PDAInstance, exclude=(),
+                                            fields=('date_completed', 'pda_type', 'description', 'pages', 'clock_hours', 'ceu'),
+                                            extra=1)
+
+    pdainstance_formset = PDAInstanceFormSet(queryset=PDAInstance.objects.none(), instance=pdarecord)
+
+    if request.method == 'POST':
+        pdarecord_form = PDARecordForm(request.POST)
+        pdainstance_formset = PDAInstanceFormSet(request.POST, request.FILES)
+
+        if pdarecord_form.is_valid():
+            created_pdarecord= pdarecord_form.save(commit=False)
+            pdainstance_formset = PDAInstanceFormSet(request.POST, request.FILES, instance =created_pdarecord)
+
+            if pdainstance_formset.is_valid():
+                created_pdarecord.save()
+                pdainstance_formset.save()
+                if request.user.groups.exists():
+                    group = request.user.groups.all()[0].name
+                    if group == 'teacher':
+                        # teacher landing page
+                        return redirect('teacher_dashboard')
+                    else:
+                        # admin landing page
+                        return redirect('admin_dashboard')
+
+    context = {'teacher': teacher, 'pdarecord_form': pdarecord_form, 'pdainstance_formset': pdainstance_formset}
+    return render(request, "accounts/create_pda.html", context)
 
 
 # all activities (for staff)
@@ -106,36 +173,6 @@ def teachers(request):
     context = {'teachers': teachers, 'total_teachers': total_teachers, 'my_filter': my_filter}
     return render(request, 'accounts/teachers.html', context)
 
-
-# teacher landing page, needs to be developed
-@login_required(login_url='login')
-@allowed_users(allowed_roles=['teacher'])
-def userpage(request):
-    teacher = request.user.teacher
-    context = {'teacher': teacher}
-    return render(request, 'accounts/user.html', context)
-
-
-@login_required(login_url='login')
-@allowed_users(allowed_roles=['teacher'])
-def accountsettings(request):
-    if request.method == 'POST':
-        user_form = UserForm(request.POST, instance=request.user)
-        teacher_form = TeacherForm(request.POST, instance=request.user.teacher)
-        if user_form.is_valid() and teacher_form.is_valid():
-            user_form.save()
-            teacher_form.save()
-            messages.success(request, 'Your profile was successfully updated!')
-            return redirect('account')
-        else:
-            messages.error(request, 'Please correct the error below.')
-    else:
-        user_form = UserForm(instance=request.user)
-        teacher_form = TeacherForm(instance=request.user.teacher)
-    return render(request, 'accounts/account_settings.html', {
-        'user_form': user_form,
-        'teacher_form': teacher_form
-    })
 
 
 # teacher activities for logged in user

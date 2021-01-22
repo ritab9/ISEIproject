@@ -81,7 +81,7 @@ WSGI_APPLICATION = 'ISEIproject.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'ISEIproject',
+        'NAME': 'ISEIproject2',
         'USER': 'root',
         'PASSWORD': 'Kesztyu9!',
         'HOST': 'localhost',

@@ -43,8 +43,8 @@
 				</tr>			
 				{% for activity in activities %}
 					<tr>
-						<td>{{activity.teacher}} </td>
-						<td>{{activity.category.get_category_display}} </td>
+						<td>{{activity.pdarecord.teacher}} </td>
+						<td>{{activity.type.get_category_display}} </td>
 						<td>{{activity.date}} </td>
 						<td>{{activity.CEUs}} </td>
 						
