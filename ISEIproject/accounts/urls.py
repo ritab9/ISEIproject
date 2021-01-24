@@ -6,14 +6,15 @@ urlpatterns = [
     #teacher urls
     path('teacherdashboard/', views.teacherdashboard, name='teacher_dashboard'),
     path('account_settings/', views.accountsettings, name='account_settings'),
-    path('create_pda/<str:pk>',views.createpdarecord, name='create_pda'),
+    path('myPDA/<str:pk>', views.myPDA, name='myPDA'),
+    path('create_pda/<str:pk>', views.createPDA, name='create_pda'),
 
     #admin urls
     path('admindashboard/', views.admindashboard, name='admin_dashboard'),
 
 
 
-    path('myactivities/', views.myactivities, name='myactivities'),
+
     path('activities/', views.activities, name="activities"),
     path('teachers/', views.teachers, name="teachers"),
     path('teacher/<str:pk>/', views.teacher, name="teacher"),

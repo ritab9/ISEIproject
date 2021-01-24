@@ -36,9 +36,10 @@ class PDAType(admin.ModelAdmin):
 class PDAInstanceInline(admin.StackedInline):
     model = PDAInstance
     can_delete = False
+    extra = 1
 
 
 @admin.register(PDARecord)
 class PDARecord(admin.ModelAdmin):
     inlines = [PDAInstanceInline]
-    list_display = ('teacher', 'date_submitted', 'principal_signature')
+    list_display = ('teacher', 'school_year', 'date_submitted',  'principal_signature', 'total_approved_ceus')

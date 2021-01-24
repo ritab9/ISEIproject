@@ -2,13 +2,24 @@
 {% load crispy_forms_tags %}
 {% block content %}
 
-<form action=" " method="POST" >
+<div class="row">
+    <div class="col">
+        <div class="card card-body">
+            <form action=" " method="POST" >
+                {% csrf_token %}
+                {% if user_not_teacher %}
+                    {{ pdarecord_form.teacher.label_tag }}{{ pdarecord_form.teacher }}
+                {% endif %}
+                {{ pdarecord_form.school_year.label_tag }}{{ pdarecord_form.school_year }}<br><br>
 
-{% csrf_token %}
-    {{ teacher }}
-{{ pdarecord_form.as_p }}
-{{ pdainstance_formset.as_p }}
-<input type="submit" value="submit">
+                    {{ pdainstance_formset.as_table}}<input type="submit" value="submit">
+
+                <br><br>{{ pdarecord_form.summary.label_tag }}{{ pdarecord_form.summary }}<br>
+                {{ pdarecord_form.date_submitted.label_tag }}{{ pdarecord_form.date_submitted }}
+
+
+<input type="submit" value="submit"><p>Submit only if you have entered ALL the activities for the above schoolyear</p>
 </form>
+
 
 {% endblock %}

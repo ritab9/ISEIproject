@@ -56,37 +56,46 @@ class PDAType(models.Model):
 
 
 class PDARecord(models.Model):
+    #entered by teacher at object creation
     teacher = models.ForeignKey(Teacher, on_delete=models.PROTECT, null=False, blank=False)
-    school_year = models.CharField(max_length=9, null = True)
-    summary = models.CharField(validators=[MinLengthValidator(1)], max_length=3000, blank=False, null = True,
+    school_year = models.CharField(max_length=9, null=True)
+
+    class Meta:
+        unique_together = ('teacher', 'school_year',)
+    #entered by teacher at object finalization
+    summary = models.CharField(validators=[MinLengthValidator(1)], max_length=3000, blank=True, null=True,
                                help_text='Summarize what you have learned from the combined activities and how you '
                                          'plan to apply this learning to your classroom')
-    date_submitted = models.DateField(default=datetime.now, null=True)
-    principal_signature = models.BooleanField(null=True)
-
+    date_submitted = models.DateField(null=True, blank=True)
+    #principal, after it's submitted
+    principal_signature = models.BooleanField(null=False, default = False, blank=True)
+    #ISEI admin, after signed by principal
+    total_approved_ceus = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
 
 
 class PDAInstance(models.Model):
+    #teacher
     pda_record = models.ForeignKey(PDARecord, on_delete=models.PROTECT, null=False, blank=False)
     pda_type = models.ForeignKey(PDAType, on_delete=models.PROTECT, null=False, blank=False)
-    date_completed = models.DateField(null=False)
-    description = models.CharField(validators=[MinLengthValidator(1)], max_length=3000, blank=False, null=False,
-                                   help_text='Describe the activity')
+    date_completed = models.DateField(default = datetime.now, null=False)
+    description = models.CharField(validators=[MinLengthValidator(1)], max_length=3000, blank=False, null=False)
+    # OR between those three
     ceu = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     clock_hours = models.DecimalField(max_digits=3, decimal_places=1, null=True, blank=True)
     pages = models.DecimalField(max_digits=3, decimal_places=0, null=True, blank=True)
-    approved = models.BooleanField(null=True)
-    approval_comment = models.CharField(max_length=300, null=True)
+    #ISEI admin
+    approved = models.BooleanField(null=True, blank = True)
+    approval_comment = models.CharField(max_length=300, null=True, blank=True)
 
     @property
     def approved_ceu(self):
         if self.approved:
             if self.ceu is not None:
                 return self.ceu
-            elif self.clock_hours is not None:
-                return round(self.clock_hours / 10, 2)
             elif self.pages is not None:
                 return round(self.pages / 100, 2)
+            elif self.clock_hours is not None:
+                return round(self.clock_hours / 10, 2)
 
     def __str__(self):
         return self.description
