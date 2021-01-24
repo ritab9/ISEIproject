@@ -1,9 +1,10 @@
 from django.forms import ModelForm
 from django.contrib.auth.forms import UserCreationForm
 from django import forms
-from django.contrib.auth.models import User
+from django.forms.models import inlineformset_factory
+# from django.contrib.auth.models import User
 
-# from django.forms.models import inlineformset_factory
+
 # from django.forms.models import BaseInlineFormSet
 from .models import *
 
@@ -34,3 +35,13 @@ class PDARecordForm(ModelForm):
     class Meta:
         model = PDARecord
         fields = '__all__'
+
+
+class PDAInstanceForm(forms.ModelForm):
+    class Meta:
+        model = PDAInstance
+        fields = ('pda_type', 'date_completed', 'description', 'pages', 'clock_hours', 'ceu')
+
+PDAInstanceFormSet = inlineformset_factory(PDARecord, PDAInstance,form=PDAInstanceForm, extra=1,
+                                               can_delete=True)
+

@@ -3,7 +3,11 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.forms import inlineformset_factory
 from django.shortcuts import render, redirect
+from django.views.generic.edit import CreateView, UpdateView
+from django.urls import reverse
 
+
+from .models import *
 from .decorators import unauthenticated_user, allowed_users
 from .filters import *
 from .forms import *
@@ -78,7 +82,7 @@ def teacherdashboard(request):
     context = {'teacher': teacher}
     return render(request, 'accounts/teacher_dashboard..html', context)
 
-
+#set up only for teachers now
 @login_required(login_url='login')
 @allowed_users(allowed_roles=['teacher'])
 def accountsettings(request):
@@ -102,7 +106,7 @@ def accountsettings(request):
     })
 
 
-# teacher activities for user with id=pk
+# teacher activity list for user with id=pk ... some parts not finished
 @login_required(login_url='login')
 @allowed_users(allowed_roles=['teacher', 'admin'])
 def myPDA(request, pk):
@@ -112,21 +116,81 @@ def myPDA(request, pk):
     instance_filter = PDAInstanceFilter(request.GET, queryset=pda_instance)
     pda_instance = instance_filter.qs
     count = pda_instance.count()
-    active_schoolyear = pda_records.filter(date_submitted__isnull=True).values('school_year')
+    active_records = pda_records.filter(date_submitted__isnull=True).values('id','school_year')
     # if the logged in user is a teacher, teacher name will not be rendered in the website
     if is_in_group(request.user, 'teacher'):
         user_not_teacher = False
     else:
         user_not_teacher = True
-    context = dict(teacher=teacher, user_not_teacher=user_not_teacher, active_schoolyear=active_schoolyear,
+    context = dict(teacher=teacher, user_not_teacher=user_not_teacher, active_records=active_records,
                    instance_filter=instance_filter, pda_instance=pda_instance, count=count)
     return render(request, 'accounts/myPDA.html', context)
-
-
 # todo create layout in myPDA template for it to look nicer
 
 
-# create activity record and instances (for teacher with matching pk)
+# create PDA instances (for record with matching pk)
+
+
+@login_required(login_url='login')
+@allowed_users(allowed_roles=['admin', 'teacher'])
+def createPDAInstance(request, pk):
+    pda_record = PDARecord.objects.get(id=pk)
+    formset = PDAInstanceFormSet(queryset=PDAInstance.objects.none(), instance=pda_record)
+    record_form = PDARecordForm(instance = pda_record)
+
+    if request.method == 'POST':
+        if request.POST.get('add_activity'):
+            formset = PDAInstanceFormSet(request.POST, instance=pda_record)
+            if formset.is_valid():
+                formset.save()
+        if request.POST.get('submit_record'):
+            record_form = PDAInstanceFormSet(request.POST, instance=pda_record)
+            if record_form.is_valid():
+                record_form.save()
+                if is_in_group(request.user, 'teacher'):
+                    return redirect('myPDA', pk=pda_record.teacher.user.id)
+
+    if is_in_group(request.user, 'teacher'):
+        user_not_teacher = False
+    else:
+        user_not_teacher = True
+    context = {'user_not_teacher': user_not_teacher,'pda_record': pda_record, 'record_form':record_form, 'formset': formset}
+    return render(request, "accounts/create_pdainstance.html", context)
+
+
+# update activity (by id)
+@login_required(login_url='login')
+def updatePDAinstance(request, pk):
+    pdainstance = PDAInstance.objects.get(id=pk)
+    form = PDAInstanceForm(instance=pdainstance)
+
+    if request.method == 'POST':
+        form = PDAInstanceForm(request.POST, instance=pdainstance)
+        if form.is_valid():
+            form.save()
+            if is_in_group(request.user, 'teacher'):        # teacher landing page
+                return redirect('myPDA', pk=pdainstance.pda_record.teacher.user.id)
+
+    context = {'form': form}
+    return render(request, "accounts/update_pdainstance.html", context)
+
+
+# delete activity (for staff)
+@login_required(login_url='login')
+@allowed_users(allowed_roles=['admin', 'teacher'])
+def deletePDAinstance(request, pk):
+    pdainstance = PDAInstance.objects.get(id=pk)
+
+    if request.method == "POST":
+        pdainstance.delete()
+        if is_in_group(request.user, 'teacher'):  # teacher landing page
+            return redirect('myPDA', pk=pdainstance.pda_record.teacher.user.id)
+
+    context = {'item': pdainstance}
+    return render(request, 'accounts/delete_pdainstance.html', context)
+
+
+# create activity record and instances (for teacher with matching pk) - doesn't work!!!
 @login_required(login_url='login')
 @allowed_users(allowed_roles=['admin', 'teacher'])
 def createPDA(request, pk):
@@ -166,6 +230,9 @@ def createPDA(request, pk):
 
     context = {'teacher': teacher, 'pdarecord_form': pdarecord_form, 'pdainstance_formset': pdainstance_formset}
     return render(request, "accounts/create_pda.html", context)
+
+
+
 
 
 # all activities (for staff)
@@ -238,7 +305,7 @@ def createactivity(request):
             return redirect('/')
 
     context = {'form': form}
-    return render(request, "accounts/activity_form.html", context)
+    return render(request, "accounts/update_pdainstance.html", context)
 
 
 # update activity (for staff)
@@ -263,26 +330,7 @@ def updateActivity(request, pk):
                     return redirect('/activities')
 
     context = {'form': form}
-    return render(request, "accounts/activity_form.html", context)
-
-
-# delete activity (for staff)
-@login_required(login_url='login')
-@allowed_users(allowed_roles=['admin', 'teacher'])
-def deleteActivity(request, pk):
-    activity = Activity.objects.get(id=pk)
-    if request.method == "POST":
-        activity.delete()
-        if request.user.groups.exists():
-            group = request.user.groups.all()[0].name
-            if group == 'teacher':
-                # teacher landing page
-                return redirect('/myactivities')
-            else:
-                # admin landing page
-                return redirect('activities')
-    context = {'item': activity}
-    return render(request, 'accounts/delete.html', context)
+    return render(request, "accounts/update_pdainstance.html", context)
 
 
 # create activity (for teacher with matching pk)

@@ -8,14 +8,11 @@
 		<div class="card card-body">
 
 			<p> Are you sure you want to delete "{{item}}"?</p>
-			<form action="{% url 'delete_activity' item.id %}" method="POST">
+			<form action="{% url 'delete_pdainstance' item.id %}" method="POST">
 				{% csrf_token %}
 
-				{% if request.user.is_staff %}
-					<a class="btn btn-warning" href="{%  url 'activities' %}">Cancel</a>
-				{% else %}
-					<a class="btn btn-warning" href="{%  url 'myactivities' %}">Cancel</a>
-				{% endif %}
+					<a class="btn btn-warning" href="{%  url 'myPDA' item.pda_record.teacher.user.id %}">Cancel</a>
+
 					<input class="btn btn-danger" type='submit' value ='Confirm'>
 			</form>
 		</div>

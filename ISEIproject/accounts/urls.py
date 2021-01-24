@@ -7,7 +7,12 @@ urlpatterns = [
     path('teacherdashboard/', views.teacherdashboard, name='teacher_dashboard'),
     path('account_settings/', views.accountsettings, name='account_settings'),
     path('myPDA/<str:pk>', views.myPDA, name='myPDA'),
-    path('create_pda/<str:pk>', views.createPDA, name='create_pda'),
+
+    path('update_pdainstance/<str:pk>/', views.updatePDAinstance, name="update_pdainstance"),
+    path('delete_pdainstance/<str:pk>/', views.deletePDAinstance, name="delete_pdainstance"),
+
+    path('create_pdainstance/<str:pk>', views.createPDAInstance, name='create_pdainstance'), #pk is for a pda record
+    path('create_pda/<str:pk>', views.createPDA, name='create_pda'), #pk is for a teacher
 
     #admin urls
     path('admindashboard/', views.admindashboard, name='admin_dashboard'),
@@ -21,8 +26,6 @@ urlpatterns = [
     path('activities/create_activity/', views.createactivity, name="create_activity"),
 
     # pk is the activity ID
-    path('activities/update_activity/<str:pk>/', views.updateActivity, name="update_activity"),
-    path('activities/delete_activity/<str:pk>/', views.deleteActivity, name="delete_activity"),
     path('activities/create_activityuser/<str:pk>/', views.createUserActivity, name="create_activityuser"),
 
 

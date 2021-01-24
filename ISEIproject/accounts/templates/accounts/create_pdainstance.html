@@ -1,0 +1,30 @@
+{% extends 'accounts/main.html' %}
+{% load crispy_forms_tags %}
+{% block content %}
+
+{% if user_not_teacher %}
+    {{ teacher }}
+{% endif %}
+    {{ pda_record.school_year }}
+
+    <div class="row">
+    <div class="col">
+        <div class="card card-body">
+            <form action=" " method="POST"  >
+                {% csrf_token %}
+                    {{ formset.as_table}}
+                <input type="submit" value="Add Activity" name = "add_activity">
+
+                <p>Submit only if you have entered ALL the activities for the above school year. No more entries will be allowed. </p>
+
+                {{ record_form.teacher.label_tag }}{{ record_form.teacher }}
+                {{ record_form.school_year.label_tag }}{{ record_form.school_year }}
+                {{ record_form.summary.label_tag }}{{ record_form.summary }}<br>
+                {{ record_form.date_submitted.label_tag }}{{ record_form.date_submitted }}
+                <input type="submit" value="Submit" name = "submit_record">
+            </form>
+        </div>
+    </div>
+    </div>
+
+{% endblock %}

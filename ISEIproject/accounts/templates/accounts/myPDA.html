@@ -32,8 +32,8 @@
         <div class="col-sm-2">
             <form>
                 <div class="list-group" >
-                    {% for sy in active_schoolyear %}
-                        <a class=" btn btn-default  btn-sm" href="">  Add PDA for {{ sy.school_year }} </a>
+                    {% for ar in active_records %}
+                        <a class=" btn btn-default  btn-sm" href="{%  url 'create_pdainstance' ar.id %}">  Add PDA for {{ ar.school_year }} </a>
                     {% endfor %}
                 </div>
             </form>
@@ -86,7 +86,9 @@
                         <td>{{p.approved|yesno:"Yes,No,Pending"}} </td>
                         <td>{{p.approved_ceu}} </td>
                         <td>{{p.comment|default_if_none:""}} </td>
-						<td>{{p.summary|default_if_none:""}} </td>
+						<td>{{p.pda_record.summary|default_if_none:""}} </td>
+                        <td><a class = "btn btn-sm btn-info" href="{% url 'update_pdainstance' p.id %}">Update</a></td>
+						<td><a class = "btn btn-sm btn-danger" href="{% url 'delete_pdainstance' p.id %}">Delete</a></td>
 
 					</tr>	
 
