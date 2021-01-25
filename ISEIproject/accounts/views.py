@@ -106,7 +106,7 @@ def accountsettings(request):
     })
 
 
-# teacher activity list for user with id=pk ... some parts not finished
+# teacher activities for user with id=pk ... some parts not finished
 @login_required(login_url='login')
 @allowed_users(allowed_roles=['teacher', 'admin'])
 def myPDA(request, pk):
@@ -128,13 +128,22 @@ def myPDA(request, pk):
 # todo create layout in myPDA template for it to look nicer
 
 
-# create PDA instances (for record with matching pk)
-
-
+# create PDA instance + allows for record submission (for record with matching pk)
 @login_required(login_url='login')
 @allowed_users(allowed_roles=['admin', 'teacher'])
-def createPDAInstance(request, pk):
-    pda_record = PDARecord.objects.get(id=pk)
+def createPDA(request, pk, recId, sy):
+    if recId == "0":
+        print("got here")
+        pda_record = PDARecord()
+        pda_record.teacher = Teacher.objects.get(user__id=pk)
+        pda_record.school_year = sy
+        pda_record.save()
+
+    else:
+        pda_record = PDARecord.objects.get(id=recId)
+        print("this branch")
+
+    pda_instance = PDAInstance.objects.filter(pda_record=pda_record)
     formset = PDAInstanceFormSet(queryset=PDAInstance.objects.none(), instance=pda_record)
     record_form = PDARecordForm(instance = pda_record)
 
@@ -143,8 +152,9 @@ def createPDAInstance(request, pk):
             formset = PDAInstanceFormSet(request.POST, instance=pda_record)
             if formset.is_valid():
                 formset.save()
+                formset = PDAInstanceFormSet(queryset=PDAInstance.objects.none(), instance=pda_record)
         if request.POST.get('submit_record'):
-            record_form = PDAInstanceFormSet(request.POST, instance=pda_record)
+            record_form = PDARecordForm(request.POST, instance=pda_record)
             if record_form.is_valid():
                 record_form.save()
                 if is_in_group(request.user, 'teacher'):
@@ -154,11 +164,12 @@ def createPDAInstance(request, pk):
         user_not_teacher = False
     else:
         user_not_teacher = True
-    context = {'user_not_teacher': user_not_teacher,'pda_record': pda_record, 'record_form':record_form, 'formset': formset}
-    return render(request, "accounts/create_pdainstance.html", context)
+    context = {'user_not_teacher': user_not_teacher, 'pda_instance': pda_instance,'pda_record': pda_record, 'record_form':record_form, 'formset': formset}
+    return render(request, "accounts/create_pda.html", context)
 
 
-# update activity (by id)
+
+# update PDAinstance (by id)
 @login_required(login_url='login')
 def updatePDAinstance(request, pk):
     pdainstance = PDAInstance.objects.get(id=pk)
@@ -175,7 +186,7 @@ def updatePDAinstance(request, pk):
     return render(request, "accounts/update_pdainstance.html", context)
 
 
-# delete activity (for staff)
+# delete PDAinstance (by id)
 @login_required(login_url='login')
 @allowed_users(allowed_roles=['admin', 'teacher'])
 def deletePDAinstance(request, pk):
@@ -190,46 +201,11 @@ def deletePDAinstance(request, pk):
     return render(request, 'accounts/delete_pdainstance.html', context)
 
 
-# create activity record and instances (for teacher with matching pk) - doesn't work!!!
-@login_required(login_url='login')
-@allowed_users(allowed_roles=['admin', 'teacher'])
-def createPDA(request, pk):
-    user = User.objects.get(id=pk)
-    teacher = Teacher.objects.get(user=user)
-    pdarecord = PDARecord()
-    pdarecord.teacher = teacher
-    pdarecord_form = PDARecordForm(instance=pdarecord)
 
-    PDAInstanceFormSet = inlineformset_factory(PDARecord, PDAInstance, exclude=(),
-                                               fields=(
-                                                   'date_completed', 'pda_type', 'description', 'pages', 'clock_hours',
-                                                   'ceu'),
-                                               extra=1)
 
-    pdainstance_formset = PDAInstanceFormSet(queryset=PDAInstance.objects.none(), instance=pdarecord)
 
-    if request.method == 'POST':
-        pdarecord_form = PDARecordForm(request.POST)
-        pdainstance_formset = PDAInstanceFormSet(request.POST, request.FILES)
 
-        if pdarecord_form.is_valid():
-            created_pdarecord = pdarecord_form.save(commit=False)
-            pdainstance_formset = PDAInstanceFormSet(request.POST, request.FILES, instance=created_pdarecord)
 
-            if pdainstance_formset.is_valid():
-                created_pdarecord.save()
-                pdainstance_formset.save()
-                if request.user.groups.exists():
-                    group = request.user.groups.all()[0].name
-                    if group == 'teacher':
-                        # teacher landing page
-                        return redirect('teacher_dashboard')
-                    else:
-                        # admin landing page
-                        return redirect('admin_dashboard')
-
-    context = {'teacher': teacher, 'pdarecord_form': pdarecord_form, 'pdainstance_formset': pdainstance_formset}
-    return render(request, "accounts/create_pda.html", context)
 
 
 

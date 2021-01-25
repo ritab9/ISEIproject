@@ -2,24 +2,43 @@
 {% load crispy_forms_tags %}
 {% block content %}
 
-<div class="row">
+    {% if user_not_teacher %}
+        {{ pda_record.teacher }}
+    {% endif %}
+    {{ pda_record.school_year }}
+
     <div class="col">
         <div class="card card-body">
-            <form action=" " method="POST" >
-                {% csrf_token %}
-                {% if user_not_teacher %}
-                    {{ pdarecord_form.teacher.label_tag }}{{ pdarecord_form.teacher }}
-                {% endif %}
-                {{ pdarecord_form.school_year.label_tag }}{{ pdarecord_form.school_year }}<br><br>
+            <table class="table table-sm">
+                <tr>
+                    <th>Activity Type</th> <th>Date Completed</th><th>Description</th><th>ceu</th><th>clock_Hours</th><th>pages</th>
+                    <th>Update</th><th>Remove</th>
+                </tr>
 
-                    {{ pdainstance_formset.as_table}}<input type="submit" value="submit">
+                {% for p in pda_instance %}
+                <tr>
+                    <td>{{p.pda_type}} </td><td>{{p.date_completed}} </td><td>{{p.description}} </td>
+                    <td>{{p.ceu|default_if_none:"" }} </td><td>{{p.clock_hours|default_if_none:""}} </td><td>{{p.pages|default_if_none:""}} </td>
+                    <td><a class = "btn btn-sm btn-info" href="{% url 'update_pdainstance' p.id %}">Update</a></td>
+                    <td><a class = "btn btn-sm btn-danger" href="{% url 'delete_pdainstance' p.id %}">Delete</a></td>
+                </tr>
+                {% endfor %}
+            </table>
 
-                <br><br>{{ pdarecord_form.summary.label_tag }}{{ pdarecord_form.summary }}<br>
-                {{ pdarecord_form.date_submitted.label_tag }}{{ pdarecord_form.date_submitted }}
 
 
-<input type="submit" value="submit"><p>Submit only if you have entered ALL the activities for the above schoolyear</p>
-</form>
+        </div>
+    </div>
+ Enter new activity:
+            <form action=" " method="POST">
+                    {% csrf_token %}
+                     {{ formset }}
+                <input class = "btn btn-sm btn-default" type="submit" value="Add Activity" name = "add_activity">
+                       <br><br>
 
+                Submit all activities for {{ pda_record.school_year }} school year: <br>
+                {{ record_form }}
+            <input class = "btn btn-sm btn-default" type="submit" value="Submit" name = "submit_record">
+            </form>
 
 {% endblock %}

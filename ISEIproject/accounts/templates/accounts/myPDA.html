@@ -33,14 +33,14 @@
             <form>
                 <div class="list-group" >
                     {% for ar in active_records %}
-                        <a class=" btn btn-default  btn-sm" href="{%  url 'create_pdainstance' ar.id %}">  Add PDA for {{ ar.school_year }} </a>
+                        <a class=" btn btn-default  btn-sm" href="{%  url 'create_pda' 0 ar.id 0 %}">  Add PDA for {{ ar.school_year }} </a>
                     {% endfor %}
                 </div>
             </form>
         </div>
         <br>
         <div class="col-sm-3">
-            <a class=" btn btn-default  btn-sm" href="{%  url 'create_pda' teacher.user.id %}">Add PDA for new school year</a>
+            <a class=" btn btn-default  btn-sm" href="{%  url 'create_pda' teacher.user.id 0 '2021-2022'%}">Add PDA for new school year</a>
         </div>
     </div>
 
@@ -82,10 +82,18 @@
                         <td>{{p.ceu|default_if_none:"" }} </td>
                         <td>{{p.clock_hours|default_if_none:""}} </td>
 						<td>{{p.pages|default_if_none:""}} </td>
-                        <td>{{p.pda_record.principal_signature|yesno:"Yes,Not yet"}} </td>
-                        <td>{{p.approved|yesno:"Yes,No,Pending"}} </td>
-                        <td>{{p.approved_ceu}} </td>
-                        <td>{{p.comment|default_if_none:""}} </td>
+                        {% if p.pda_record.principal_signature %}
+                            <td>{{p.pda_record.principal_signature}} </td>
+                            <td>{{p.approved|yesno:"Yes,No,Pending"}} </td>
+                            <td>{{p.approved_ceu}} </td>
+                            <td>{{p.comment|default_if_none:""}} </td>
+                            {% else %}
+                            {% if p.pda_record.date_submitted %}
+                            <td style = "color:red;size:40px">Not yet</td>
+                            {% else %}<td></td>
+                            {% endif %}
+                            <td></td><td></td><td></td>
+                        {% endif %}
 						<td>{{p.pda_record.summary|default_if_none:""}} </td>
                         <td><a class = "btn btn-sm btn-info" href="{% url 'update_pdainstance' p.id %}">Update</a></td>
 						<td><a class = "btn btn-sm btn-danger" href="{% url 'delete_pdainstance' p.id %}">Delete</a></td>

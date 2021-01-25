@@ -1,4 +1,4 @@
-from django.forms import ModelForm
+from django.forms import ModelForm, modelformset_factory
 from django.contrib.auth.forms import UserCreationForm
 from django import forms
 from django.forms.models import inlineformset_factory
@@ -34,7 +34,20 @@ class TeacherForm(ModelForm):
 class PDARecordForm(ModelForm):
     class Meta:
         model = PDARecord
-        fields = '__all__'
+        fields = ('school_year', 'date_submitted', 'summary')
+        #widgets = {
+        #    'school_year': forms.TextInput(attrs={'class': 'form-controls', 'placehoder': 'Enter school year'}),
+        #    'date_submitted': forms.DateField(attrs={'class': 'form-controls', 'placehoder': 'Enter date'}),
+        #    'summary': forms.Textarea(
+        #        attrs={'class': 'form-controls', 'placehoder': 'Enter summary for combined activities'})
+        #}
+
+
+PDAInstanceModelFormset = modelformset_factory(
+    PDAInstance,
+    fields=('pda_type', 'date_completed', 'description', 'pages', 'clock_hours', 'ceu'),
+    widgets={}
+)
 
 
 class PDAInstanceForm(forms.ModelForm):
@@ -42,6 +55,7 @@ class PDAInstanceForm(forms.ModelForm):
         model = PDAInstance
         fields = ('pda_type', 'date_completed', 'description', 'pages', 'clock_hours', 'ceu')
 
-PDAInstanceFormSet = inlineformset_factory(PDARecord, PDAInstance,form=PDAInstanceForm, extra=1,
-                                               can_delete=True)
 
+
+PDAInstanceFormSet = inlineformset_factory(PDARecord, PDAInstance, form=PDAInstanceForm, extra=1,
+                                           can_delete=False)

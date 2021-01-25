@@ -11,8 +11,9 @@ urlpatterns = [
     path('update_pdainstance/<str:pk>/', views.updatePDAinstance, name="update_pdainstance"),
     path('delete_pdainstance/<str:pk>/', views.deletePDAinstance, name="delete_pdainstance"),
 
-    path('create_pdainstance/<str:pk>', views.createPDAInstance, name='create_pdainstance'), #pk is for a pda record
-    path('create_pda/<str:pk>', views.createPDA, name='create_pda'), #pk is for a teacher
+    #new record: pk - user ID, sy- School-year, #existing record: recId PDA record ID
+    path('create_pda/<str:pk>/<str:recId>/<str:sy>/', views.createPDA, name='create_pda'),
+
 
     #admin urls
     path('admindashboard/', views.admindashboard, name='admin_dashboard'),
