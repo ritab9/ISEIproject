@@ -23,9 +23,14 @@ admin.site.register(User, UserAdmin)
 
 @admin.register(School)
 class School(admin.ModelAdmin):
-    list_display = ('name', 'abbreviation')
-    fields = ['name', 'abbreviation']
+    list_display = ('name', 'abbreviation', 'school_code')
+    list_editable = ( 'abbreviation', 'school_code')
 
+@admin.register(SchoolYear)
+class SchoolYear(admin.ModelAdmin):
+    list_display = ('name','active_year')
+    list_editable = ('active_year',)
+    list_display_links = ('name',)
 
 @admin.register(PDAType)
 class PDAType(admin.ModelAdmin):
@@ -43,3 +48,5 @@ class PDAInstanceInline(admin.StackedInline):
 class PDARecord(admin.ModelAdmin):
     inlines = [PDAInstanceInline]
     list_display = ('teacher', 'school_year', 'date_submitted',  'principal_signature', 'total_approved_ceus')
+    list_editable = ('date_submitted',  'principal_signature')
+    list_display_links = ('teacher',)

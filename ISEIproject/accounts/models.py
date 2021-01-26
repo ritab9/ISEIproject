@@ -12,7 +12,9 @@ from django.core.validators import MinLengthValidator
 class School(models.Model):
     name = models.CharField(max_length=50, help_text='Enter the name of the school', unique=True, blank=False,
                             null=False)
-    abbreviation = models.CharField(max_length=4, default="none", help_text=' Enter the abbreviation for this school')
+    abbreviation = models.CharField(max_length=4, default=" ", help_text=' Enter the abbreviation for this school')
+    school_code = models.CharField(max_length=15, help_text='Code to allow a user to register as principal',
+                                   default="pxyughkn8986")
     ordering = ['name']
 
     def __str__(self):
@@ -54,14 +56,30 @@ class PDAType(models.Model):
     def __str__(self):
         return self.get_category_display() + ' - ' + self.type
 
+class SchoolYear(models.Model):
+    name = models.CharField(max_length=9, unique=True)
+    active_year = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ('-name',)
+
+    def __str__(self):
+        return self.name
+
+    def save(self, *args, **kwargs):
+        super(SchoolYear, self).save(*args, **kwargs)
+        if self.active_year:
+            all=SchoolYear.objects.exclude(id=self.id).update(active_year=False)
+
 
 class PDARecord(models.Model):
     #entered by teacher at object creation
     teacher = models.ForeignKey(Teacher, on_delete=models.PROTECT, null=False, blank=False)
-    school_year = models.CharField(max_length=9, null=True)
+    school_year = models.ForeignKey(SchoolYear, null=True, blank=True, on_delete =models.PROTECT)
 
     class Meta:
         unique_together = ('teacher', 'school_year',)
+        ordering = ['school_year']
     #entered by teacher at object finalization
     summary = models.CharField(validators=[MinLengthValidator(1)], max_length=3000, blank=True, null=True,
                                help_text='Summarize what you have learned from the combined activities and how you '
@@ -77,16 +95,23 @@ class PDAInstance(models.Model):
     #teacher
     pda_record = models.ForeignKey(PDARecord, on_delete=models.PROTECT, null=False, blank=False)
     pda_type = models.ForeignKey(PDAType, on_delete=models.PROTECT, null=False, blank=False)
-    date_completed = models.DateField(default = datetime.now, null=False)
+    date_completed = models.DateField(null=False)
     description = models.CharField(validators=[MinLengthValidator(1)], max_length=3000, blank=False, null=False)
     # OR between those three
     ceu = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     clock_hours = models.DecimalField(max_digits=3, decimal_places=1, null=True, blank=True)
     pages = models.DecimalField(max_digits=3, decimal_places=0, null=True, blank=True)
     #ISEI admin
-    approved = models.BooleanField(null=True, blank = True)
+    CHOICES = (
+        ('None', 'Pending'),
+        ('True', 'Approved'),
+        ('False', 'Not Approved'),
+    )
+    approved = models.NullBooleanField(choices = CHOICES, default = None)
     approval_comment = models.CharField(max_length=300, null=True, blank=True)
 
+    class Meta:
+        ordering =['pda_record']
     @property
     def approved_ceu(self):
         if self.approved:

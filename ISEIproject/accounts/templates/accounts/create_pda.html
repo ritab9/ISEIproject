@@ -25,20 +25,31 @@
                 {% endfor %}
             </table>
 
-
-
         </div>
     </div>
- Enter new activity:
-            <form action=" " method="POST">
-                    {% csrf_token %}
-                     {{ formset }}
-                <input class = "btn btn-sm btn-default" type="submit" value="Add Activity" name = "add_activity">
-                       <br><br>
 
-                Submit all activities for {{ pda_record.school_year }} school year: <br>
-                {{ record_form }}
-            <input class = "btn btn-sm btn-default" type="submit" value="Submit" name = "submit_record">
-            </form>
+    {% if pda_record.date_submitted  %}
+        Summary: {{pda_record.summary}}<br>
+        Approved CEUs: {{ pda_record.total_approved_ceus }}
+    {% else %}
+    <form action=" " method="POST">
+         &nbsp Enter new activity:
+            {% csrf_token %}
+         &nbsp   {{ formset }}
+         &nbsp   <input class = "btn btn-sm btn-default" type="submit" value="Add Activity" name = "add_activity">
 
+        <br><br>
+
+        &nbsp Submit all activities for {{ pda_record.school_year }} school year: <br>
+        &nbsp
+                    <p id="school_year">{{record_form.school_year}}<p>
+        Date: {{ record_form.date_submitted }}<br>
+        Summary: {{ record_form.summary }}
+        &nbsp    <input class = "btn btn-sm btn-default" type="submit" value="Submit" name = "submit_record">
+
+    </form>
+    {% endif %}
+ <script>
+        document.getElementById("school_year").style.display = "none";
+ </script>
 {% endblock %}

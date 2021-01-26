@@ -69,8 +69,9 @@ def admindashboard(request):
     total_teachers = teachers.count()
     total_activities = activities.count()
 
-    context = {'teachers': teachers, 'activities': activities, 'total_teachers': total_teachers,
-               'total_activities': total_activities}
+    user_is ="user_is_admin"
+    context = dict(user_is= user_is, teachers=teachers, activities=activities, total_teachers=total_teachers,
+                   total_activities=total_activities)
     return render(request, 'accounts/admin_dashboard.html', context)
 
 
@@ -80,6 +81,8 @@ def teacherdashboard(request):
     # TODO teacher dashboard
     teacher = request.user.teacher
     context = {'teacher': teacher}
+    user_is = "user_is_teacher"
+    context = dict(user_is=user_is)
     return render(request, 'accounts/teacher_dashboard..html', context)
 
 #set up only for teachers now
@@ -109,23 +112,36 @@ def accountsettings(request):
 # teacher activities for user with id=pk ... some parts not finished
 @login_required(login_url='login')
 @allowed_users(allowed_roles=['teacher', 'admin'])
-def myPDA(request, pk):
+def myPDAdashboard(request, pk):
     teacher = Teacher.objects.get(user=User.objects.get(id=pk))
-    pda_records = PDARecord.objects.filter(teacher=teacher)
-    pda_instance = PDAInstance.objects.filter(pda_record__in=pda_records)
+    pda_record = PDARecord.objects.filter(teacher=teacher )
+    pda_instance = PDAInstance.objects.filter(pda_record__in=pda_record)
+
+    active_record = pda_record.filter(principal_signature=False)
+    submitted_record = pda_record.filter(principal_signature=True)
+
     instance_filter = PDAInstanceFilter(request.GET, queryset=pda_instance)
     pda_instance = instance_filter.qs
-    count = pda_instance.count()
-    active_records = pda_records.filter(date_submitted__isnull=True).values('id','school_year')
-    # if the logged in user is a teacher, teacher name will not be rendered in the website
+
+    active_instance = pda_instance.filter(pda_record__in= active_record)
+    submitted_instance = pda_instance.filter(pda_record__in=submitted_record)
+
+    count = active_instance.count()+submitted_instance.count()
+
+    no_record_school_years = SchoolYear.objects.exclude(pdarecord__in=pda_record)
+
+
     if is_in_group(request.user, 'teacher'):
         user_not_teacher = False
     else:
         user_not_teacher = True
-    context = dict(teacher=teacher, user_not_teacher=user_not_teacher, active_records=active_records,
-                   instance_filter=instance_filter, pda_instance=pda_instance, count=count)
-    return render(request, 'accounts/myPDA.html', context)
-# todo create layout in myPDA template for it to look nicer
+    context = dict(teacher=teacher,user_not_teacher=user_not_teacher, instance_filter=instance_filter, count=count,
+                   no_record_school_years=no_record_school_years, pda_instance=pda_instance,
+                   active_record=active_record, submitted_record=submitted_record,
+                   active_instance = active_instance, submitted_instance = submitted_instance)
+    return render(request, 'accounts/myPDAdashboard.html', context)
+# todo create layout in myPDAdashboard template for it to look nicer
+# todo adjust template so that it would allow for the choosing of a different teacher if user_not_teacher
 
 
 # create PDA instance + allows for record submission (for record with matching pk)
@@ -133,15 +149,13 @@ def myPDA(request, pk):
 @allowed_users(allowed_roles=['admin', 'teacher'])
 def createPDA(request, pk, recId, sy):
     if recId == "0":
-        print("got here")
         pda_record = PDARecord()
         pda_record.teacher = Teacher.objects.get(user__id=pk)
-        pda_record.school_year = sy
+        pda_record.school_year = SchoolYear.objects.get(id=sy)
         pda_record.save()
-
     else:
         pda_record = PDARecord.objects.get(id=recId)
-        print("this branch")
+
 
     pda_instance = PDAInstance.objects.filter(pda_record=pda_record)
     formset = PDAInstanceFormSet(queryset=PDAInstance.objects.none(), instance=pda_record)
@@ -149,16 +163,19 @@ def createPDA(request, pk, recId, sy):
 
     if request.method == 'POST':
         if request.POST.get('add_activity'):
+            print("activity")
             formset = PDAInstanceFormSet(request.POST, instance=pda_record)
             if formset.is_valid():
                 formset.save()
                 formset = PDAInstanceFormSet(queryset=PDAInstance.objects.none(), instance=pda_record)
+
         if request.POST.get('submit_record'):
+            print("record")
             record_form = PDARecordForm(request.POST, instance=pda_record)
             if record_form.is_valid():
                 record_form.save()
                 if is_in_group(request.user, 'teacher'):
-                    return redirect('myPDA', pk=pda_record.teacher.user.id)
+                    return redirect('myPDAdashboard', pk=pda_record.teacher.user.id)
 
     if is_in_group(request.user, 'teacher'):
         user_not_teacher = False
@@ -180,7 +197,7 @@ def updatePDAinstance(request, pk):
         if form.is_valid():
             form.save()
             if is_in_group(request.user, 'teacher'):        # teacher landing page
-                return redirect('myPDA', pk=pdainstance.pda_record.teacher.user.id)
+                return redirect('myPDAdashboard', pk=pdainstance.pda_record.teacher.user.id)
 
     context = {'form': form}
     return render(request, "accounts/update_pdainstance.html", context)
@@ -195,7 +212,7 @@ def deletePDAinstance(request, pk):
     if request.method == "POST":
         pdainstance.delete()
         if is_in_group(request.user, 'teacher'):  # teacher landing page
-            return redirect('myPDA', pk=pdainstance.pda_record.teacher.user.id)
+            return redirect('myPDAdashboard', pk=pdainstance.pda_record.teacher.user.id)
 
     context = {'item': pdainstance}
     return render(request, 'accounts/delete_pdainstance.html', context)

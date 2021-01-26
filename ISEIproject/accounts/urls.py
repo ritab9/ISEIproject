@@ -4,15 +4,22 @@ from . import views
 
 urlpatterns = [
     #teacher urls
+
     path('teacherdashboard/', views.teacherdashboard, name='teacher_dashboard'),
     path('account_settings/', views.accountsettings, name='account_settings'),
-    path('myPDA/<str:pk>', views.myPDA, name='myPDA'),
+    path('myPDAdashboard/<str:pk>', views.myPDAdashboard, name='myPDAdashboard'),
 
     path('update_pdainstance/<str:pk>/', views.updatePDAinstance, name="update_pdainstance"),
     path('delete_pdainstance/<str:pk>/', views.deletePDAinstance, name="delete_pdainstance"),
 
-    #new record: pk - user ID, sy- School-year, #existing record: recId PDA record ID
+    #create PDA instances and records. View submitted PDAs
+    #new record: pk - user ID, 0, sy- School-year,  #existing record: 0 recId 0 PDA record ID
     path('create_pda/<str:pk>/<str:recId>/<str:sy>/', views.createPDA, name='create_pda'),
+
+
+    #principal urls
+
+
 
 
     #admin urls
@@ -20,14 +27,13 @@ urlpatterns = [
 
 
 
-
-    path('activities/', views.activities, name="activities"),
-    path('teachers/', views.teachers, name="teachers"),
-    path('teacher/<str:pk>/', views.teacher, name="teacher"),
-    path('activities/create_activity/', views.createactivity, name="create_activity"),
+#Unused
+#   path('teachers/', views.teachers, name="teachers"),
+#    path('teacher/<str:pk>/', views.teacher, name="teacher"),
+#    path('activities/create_activity/', views.createactivity, name="create_activity"),
 
     # pk is the activity ID
-    path('activities/create_activityuser/<str:pk>/', views.createUserActivity, name="create_activityuser"),
+#   path('activities/create_activityuser/<str:pk>/', views.createUserActivity, name="create_activityuser"),
 
 
 

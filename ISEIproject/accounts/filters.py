@@ -1,5 +1,5 @@
 import django_filters
-from django_filters import DateFilter, CharFilter, ChoiceFilter, BooleanFilter
+from django_filters import DateFilter, CharFilter, ChoiceFilter, BooleanFilter, ModelChoiceFilter
 
 from .models import *
 
@@ -9,15 +9,18 @@ class PDAInstanceFilter(django_filters.FilterSet):
     start_date = DateFilter(field_name="date_completed", lookup_expr='gte', label='Completed after:')
     end_date = DateFilter(field_name="date_completed", lookup_expr='lte', label='Completed before:')
     description = CharFilter(field_name='description', lookup_expr='icontains', label='Description')
-    school_year = CharFilter(field_name='pda_record__school_year', label='School Year')
+    #school_year = CharFilter(field_name='pda_record__school_year', label='School Year')
+    school_year = ModelChoiceFilter(field_name='pda_record__school_year', queryset=SchoolYear.objects.all())
     CHOICES = (
-        (None, 'Pending'),
-        (True, 'Approved'),
-        (False, 'Not Approved'),
+        ('True', 'Approved'),
+        ('False', 'Not Approved'),
     )
-    principal_signature = ChoiceFilter(field_name='pda_record__principal_signature', label='Principal signed', )
-    approved = ChoiceFilter(field_name='approved',label='Approved', choices = CHOICES)
-
+    #CHOICES2 = (
+    #    (True, 'Signed'),
+    #    (False, 'Pending'),
+    #)
+    #principal_signature = ChoiceFilter(field_name='pda_record__principal_signature', label='Principal signed', choices = CHOICES2 )
+    approved = ChoiceFilter(null_label= 'Pending', field_name='approved',label='Approved', choices = CHOICES)
 
 
 class TeacherFilter(django_filters.FilterSet):

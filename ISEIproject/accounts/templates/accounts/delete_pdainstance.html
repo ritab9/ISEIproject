@@ -11,7 +11,7 @@
 			<form action="{% url 'delete_pdainstance' item.id %}" method="POST">
 				{% csrf_token %}
 
-					<a class="btn btn-warning" href="{%  url 'myPDA' item.pda_record.teacher.user.id %}">Cancel</a>
+					<a class="btn btn-warning" href="{%  url 'myPDAdashboard' item.pda_record.teacher.user.id %}">Cancel</a>
 
 					<input class="btn btn-danger" type='submit' value ='Confirm'>
 			</form>
