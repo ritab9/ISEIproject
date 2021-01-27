@@ -18,8 +18,9 @@ urlpatterns = [
 
 
     #principal urls
-
-
+    path('principaldashboard/', views.principaldashboard, name='principal_dashboard'),
+    #signs the record with recID
+    path('principaldashboard/<str:recID>', views.principaldashboard, name='principal_dashboard'),
 
 
     #admin urls
@@ -28,12 +29,12 @@ urlpatterns = [
 
 
 #Unused
-#   path('teachers/', views.teachers, name="teachers"),
-#    path('teacher/<str:pk>/', views.teacher, name="teacher"),
-#    path('activities/create_activity/', views.createactivity, name="create_activity"),
+   path('teachers/', views.teachers, name="teachers"),
+    path('teacher/<str:pk>/', views.teacher, name="teacher"),
+    path('activities/create_activity/', views.createactivity, name="create_activity"),
 
     # pk is the activity ID
-#   path('activities/create_activityuser/<str:pk>/', views.createUserActivity, name="create_activityuser"),
+   path('activities/create_activityuser/<str:pk>/', views.createUserActivity, name="create_activityuser"),
 
 
 

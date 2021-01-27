@@ -39,14 +39,16 @@ def loginpage(request):
 
         if user is not None:
             login(request, user)
-
-            if is_in_group(request.user, 'teacher'):
-                if user.date_joined.date() == user.last_login.date():
-                    return redirect('account_settings')
-                else:
-                    return redirect('teacher_dashboard')
-            if is_in_group(request.user, 'admin'):
-                return redirect('admin_dashboard')
+            if is_in_group(request.user, 'principal'):
+                return redirect('principal_dashboard')
+            else:
+                if is_in_group(request.user, 'teacher'):
+                    if user.date_joined.date() == user.last_login.date():
+                        return redirect('account_settings')
+                    else:
+                        return redirect('teacher_dashboard')
+                if is_in_group(request.user, 'admin'):
+                    return redirect('admin_dashboard')
         else:
             messages.info(request, 'Username OR password is incorrect')
 
@@ -69,10 +71,29 @@ def admindashboard(request):
     total_teachers = teachers.count()
     total_activities = activities.count()
 
-    user_is ="user_is_admin"
-    context = dict(user_is= user_is, teachers=teachers, activities=activities, total_teachers=total_teachers,
+
+    context = dict( teachers=teachers, activities=activities, total_teachers=total_teachers,
                    total_activities=total_activities)
     return render(request, 'accounts/admin_dashboard.html', context)
+
+@login_required(login_url='login')
+@allowed_users(allowed_roles=['principal'])
+def principaldashboard(request, recID=None):
+    principal = request.user.teacher
+    teachers = Teacher.objects.filter(school = principal.school)
+    pda_record_unsigned = PDARecord.objects.filter(teacher__school=principal.school, date_submitted__isnull=False, principal_signature = False)
+    pda_record_signed = PDARecord.objects.filter(teacher__school=principal.school, date_submitted__isnull=False, principal_signature = True)
+
+    if request.method == 'POST':
+        if request.POST.get('sign'):
+            PDARecord.objects.filter(id=recID).update(principal_signature=True)
+            #pda_record = PDARecord.objects.get(id=recID)
+            #pda_record.principal_signature=True
+            #pda_record.save()
+
+    context = dict(teachers=teachers, pda_record_unsigned=pda_record_unsigned, pda_record_signed=pda_record_signed)
+    return render(request, 'accounts/principal_dashboard.html', context)
+
 
 
 @login_required(login_url='login')
@@ -80,10 +101,9 @@ def admindashboard(request):
 def teacherdashboard(request):
     # TODO teacher dashboard
     teacher = request.user.teacher
-    context = {'teacher': teacher}
-    user_is = "user_is_teacher"
-    context = dict(user_is=user_is)
-    return render(request, 'accounts/teacher_dashboard..html', context)
+    user_in = "teacher"
+    context = dict(user_in=user_in,teacher=teacher)
+    return render(request, 'accounts/teacher_dashboard.html', context)
 
 #set up only for teachers now
 @login_required(login_url='login')
