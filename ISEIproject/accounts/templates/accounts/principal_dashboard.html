@@ -3,6 +3,28 @@
 
 {% block content %}
     <div class="row">
+
+        <div class="col-sm-2">
+         Signed:
+            <div class="card-body">
+				<table class="table table-sm table-light">
+                  <thead class="table-light">
+                    <th>Teacher</th>
+					<th>SchoolYear</th>
+                  </thead>
+                  <tbody>
+                    {% for p in pda_record_signed%}
+					<tr>
+						<td>{{p.teacher}} </td>
+						<td>{{p.school_year}}</td>
+                    </tr>
+
+                    {% endfor %}
+                  </tbody>
+                </table>
+            </div>
+        </div>
+
         <div class="col-sm-4">
         Sign teacher activities
             <div class="card-body">
@@ -47,26 +69,6 @@
         </div>
 
 
-        <div class="col-sm-2">
-         Signed:
-            <div class="card-body">
-				<table class="table table-sm table-light">
-                  <thead class="table-light">
-                    <th>Teacher</th>
-					<th>SchoolYear</th>
-                  </thead>
-                  <tbody>
-                    {% for p in pda_record_signed%}
-					<tr>
-						<td>{{p.teacher}} </td>
-						<td>{{p.school_year}}</td>
-                    </tr>
-
-                    {% endfor %}
-                  </tbody>
-                </table>
-            </div>
-        </div>
     </div>
 
 {% endblock %}

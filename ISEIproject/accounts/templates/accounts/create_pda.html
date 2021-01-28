@@ -68,10 +68,11 @@
             </div>
         </div>
 
-<!-- update summary-->
+
         <div class="col-sm">
             <div class="card card-body">
                 <div class="row">
+<!-- update summary-->
                     <form action=" " method="POST" id="update_summary">
                         <p id="school_year">{{record_form.school_year}}</p> <!-- hidden with the script below, needed for form submission-->
                         {% csrf_token %}
@@ -79,9 +80,24 @@
                         <input class = "btn btn-sm btn-default" type="submit" value="Update Summary" name = "update_summary">
                     </form>
                 </div>
-<!-- Upload supporting documentation -->
+
                 <div class="row" style = "margin-top: 100px">
-                    <div class="col-sm-7">
+                    <div class="col-sm-3">
+<!-- List of uploaded documents-->
+                        {% if documents %}
+                            <ul>
+                            {% for d in documents %}
+                                <li><a href="{{ d.document.url }}">{{ d.name}}</a></li>
+                                <li></li>
+                            {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p>No documents.</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-sm-3">
+<!-- Upload supporting documentation -->
                         <form action=" " method="POST" enctype="multipart/form-data" id="upload">
                             {% csrf_token %}
                             {{ upload_form|crispy }}
@@ -91,6 +107,7 @@
  <!-- submit record-->
                     <div class="col">
                         <form action=" " method="POST" id="submit_record">
+                            <p id="school_year2">{{record_form.school_year}}</p>
                             {% csrf_token %}
                             {{ record_form.date_submitted|as_crispy_field }}<i>*only enter the date when you are ready to submit all activities for this school year</i> <br>
                              <input class = "btn btn-sm btn-default" type="submit" value="Submit" name = "submit_record">
@@ -105,7 +122,9 @@
 
 
     {% endif %}
- <script>
+
+    <script>
         document.getElementById("school_year").style.display = "none";
- </script>
+        document.getElementById("school_year2").style.display = "none";
+    </script>
 {% endblock %}

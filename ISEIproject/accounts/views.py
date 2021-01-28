@@ -186,11 +186,8 @@ def createPDA(request, pk, recId, sy):
     if request.method == 'POST':
         if request.POST.get('add_activity'): #add activity and stay on page
             instanceformset = PDAInstanceFormSet(request.POST, instance=pda_record)
-            print('right POST')
             if instanceformset.is_valid():
-                print('form is valid')
                 instanceformset.save()
-                print('form saved')
                 instanceformset = PDAInstanceFormSet(queryset=PDAInstance.objects.none(), instance=pda_record)
 
         if request.POST.get('submit_record','update_summary'): #update summary, stay on page, submit record - go to PDAdashboard
@@ -202,26 +199,20 @@ def createPDA(request, pk, recId, sy):
                         return redirect('myPDAdashboard', pk=pda_record.teacher.user.id)
 
         if request.POST.get('upload'):
-            print('got the request')
             upload_form = DocumentForm(request.POST, request.FILES)
-            print(request.POST)
             if upload_form.is_valid():
-                print('form is valid')
                 newdoc = SupportingDocument(document = request.FILES['docfile'], pda_record=pda_record)
                 newdoc.save()
-                print('saved')
-                #upload_form = SupportingDocumentFormSet(queryset=SupportingDocument.objects.none(), instance=pda_record)
-            else:
-                print('not valid form')
-                upload_form = DocumentForm()
 
+    documents=SupportingDocument.objects.filter(pda_record=pda_record)
 
     if is_in_group(request.user, 'teacher'):
         user_not_teacher = False
     else:
         user_not_teacher = True
     context = dict(user_not_teacher=user_not_teacher, pda_instance=pda_instance, pda_record=pda_record,
-                   record_form=record_form, instanceformset=instanceformset, upload_form=upload_form)
+                   record_form=record_form, instanceformset=instanceformset, upload_form=upload_form,
+                   documents = documents)
     return render(request, "accounts/create_pda.html", context)
 
 

@@ -135,5 +135,6 @@ class PDAInstance(models.Model):
 
 class SupportingDocument(models.Model):
     pda_record = models.ForeignKey(PDARecord, on_delete=models.CASCADE, null=False, blank=False)
+    name = models.CharField(validators=[MinLengthValidator(1)], max_length=45, blank=False, null=False)
     document = models.FileField(upload_to='documents/Supporting_Documents/')
     uploaded_at = models.DateTimeField(auto_now_add=True)
