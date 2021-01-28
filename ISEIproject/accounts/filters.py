@@ -15,11 +15,6 @@ class PDAInstanceFilter(django_filters.FilterSet):
         ('True', 'Approved'),
         ('False', 'Not Approved'),
     )
-    #CHOICES2 = (
-    #    (True, 'Signed'),
-    #    (False, 'Pending'),
-    #)
-    #principal_signature = ChoiceFilter(field_name='pda_record__principal_signature', label='Principal signed', choices = CHOICES2 )
     approved = ChoiceFilter(null_label= 'Pending', field_name='approved',label='Approved', choices = CHOICES)
 
 

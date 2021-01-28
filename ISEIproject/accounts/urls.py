@@ -12,6 +12,8 @@ urlpatterns = [
     path('update_pdainstance/<str:pk>/', views.updatePDAinstance, name="update_pdainstance"),
     path('delete_pdainstance/<str:pk>/', views.deletePDAinstance, name="delete_pdainstance"),
 
+    path('supporting_doc_upload',views.supportingdocumentupload, name ="upload_supportingdocument"),
+
     #create PDA instances and records. View submitted PDAs
     #new record: pk - user ID, 0, sy- School-year,  #existing record: 0 recId 0 PDA record ID
     path('create_pda/<str:pk>/<str:recId>/<str:sy>/', views.createPDA, name='create_pda'),

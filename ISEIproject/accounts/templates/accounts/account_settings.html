@@ -22,7 +22,8 @@
 			<h3 style="text-align: center">Account Settings</h3>
 			<hr>
             {% if request.user.teacher.profile_picture %}
-			    <img class="profile-pic" src="{{request.user.teacher.profile_picture.url}}" >
+
+			    <img class="profile-pic" src="{% static '/media/ProfilePictures/' %}{{request.user.teacher.profile_picture}}" >
 		    {% endif %}
 		</div>
 	</div>

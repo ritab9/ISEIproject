@@ -59,3 +59,17 @@ class PDAInstanceForm(forms.ModelForm):
 
 PDAInstanceFormSet = inlineformset_factory(PDARecord, PDAInstance, form=PDAInstanceForm, extra=1,
                                            can_delete=False)
+
+class DocumentForm(forms.Form):
+    docfile = forms.FileField(
+        label='Select a file',
+        help_text='max. 42 megabytes'
+    )
+
+
+#class SupportingDocumentForm(forms.ModelForm):
+#    class Meta:
+#       model = SupportingDocument
+#       fields = ('document', )
+
+#SupportingDocumentFormSet = inlineformset_factory(PDARecord, SupportingDocument, form=SupportingDocumentForm,can_delete=False, extra=1)

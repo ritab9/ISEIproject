@@ -6,6 +6,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from datetime import datetime
 from django.core.validators import MinLengthValidator
+from django.core.files.storage import FileSystemStorage
 
 
 # Create your models here.
@@ -21,11 +22,14 @@ class School(models.Model):
         return self.name
 
 
+
+fs = FileSystemStorage(location='static/media/ProfilePictures')
+
 class Teacher(models.Model):
     user = models.OneToOneField(User, null=True, blank=True, on_delete=models.CASCADE)
     school = models.ForeignKey(School, on_delete=models.PROTECT, null=True, help_text="*Required")
     phone_number = models.CharField(max_length=20, null=True, blank=True)
-    profile_picture = models.ImageField(default='blank-profile.jpg', null=True, blank=True)
+    profile_picture = models.ImageField(default='ProfilePictures/blank-profile.jpg', null=True, blank=True,storage=fs)
 
     CERTIFICATION_TYPES = {
         ('v', 'Vocational'),
@@ -36,7 +40,7 @@ class Teacher(models.Model):
         ('s', 'Standard'),
         ('p', 'Professional'),
     }
-    current_certification = models.CharField(max_length=1, choices=CERTIFICATION_TYPES, null=True, blank=True)
+    current_certification = models.CharField(max_length=1, choices=sorted(CERTIFICATION_TYPES), null=True, blank=True)
 
     def __str__(self):
         return self.user.last_name + ', ' + self.user.first_name
@@ -56,6 +60,7 @@ class PDAType(models.Model):
     def __str__(self):
         return self.get_category_display() + ' - ' + self.type
 
+
 class SchoolYear(models.Model):
     name = models.CharField(max_length=9, unique=True)
     active_year = models.BooleanField(default=False)
@@ -69,30 +74,31 @@ class SchoolYear(models.Model):
     def save(self, *args, **kwargs):
         super(SchoolYear, self).save(*args, **kwargs)
         if self.active_year:
-            all=SchoolYear.objects.exclude(id=self.id).update(active_year=False)
+            all = SchoolYear.objects.exclude(id=self.id).update(active_year=False)
 
 
 class PDARecord(models.Model):
-    #entered by teacher at object creation
+    # entered by teacher at object creation
     teacher = models.ForeignKey(Teacher, on_delete=models.PROTECT, null=False, blank=False)
-    school_year = models.ForeignKey(SchoolYear, null=True, blank=True, on_delete =models.PROTECT)
+    school_year = models.ForeignKey(SchoolYear, null=True, blank=True, on_delete=models.PROTECT)
 
     class Meta:
         unique_together = ('teacher', 'school_year',)
         ordering = ['school_year']
-    #entered by teacher at object finalization
+
+    # entered by teacher at object finalization
     summary = models.CharField(validators=[MinLengthValidator(1)], max_length=3000, blank=True, null=True,
                                help_text='Summarize what you have learned from the combined activities and how you '
                                          'plan to apply this learning to your classroom')
     date_submitted = models.DateField(null=True, blank=True)
-    #principal, after it's submitted
-    principal_signature = models.BooleanField(null=False, default = False, blank=True)
-    #ISEI admin, after signed by principal
+    # principal, after it's submitted
+    principal_signature = models.BooleanField(null=False, default=False, blank=True)
+    # ISEI admin, after signed by principal
     total_approved_ceus = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
 
 
 class PDAInstance(models.Model):
-    #teacher
+    # teacher
     pda_record = models.ForeignKey(PDARecord, on_delete=models.PROTECT, null=False, blank=False)
     pda_type = models.ForeignKey(PDAType, on_delete=models.PROTECT, null=False, blank=False)
     date_completed = models.DateField(null=False)
@@ -101,17 +107,18 @@ class PDAInstance(models.Model):
     ceu = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     clock_hours = models.DecimalField(max_digits=3, decimal_places=1, null=True, blank=True)
     pages = models.DecimalField(max_digits=3, decimal_places=0, null=True, blank=True)
-    #ISEI admin
+    # ISEI admin
     CHOICES = (
         ('None', 'Pending'),
         ('True', 'Approved'),
         ('False', 'Not Approved'),
     )
-    approved = models.NullBooleanField(choices = CHOICES, default = None)
+    approved = models.NullBooleanField(choices=CHOICES, default=None)
     approval_comment = models.CharField(max_length=300, null=True, blank=True)
 
     class Meta:
-        ordering =['pda_record']
+        ordering = ['pda_record']
+
     @property
     def approved_ceu(self):
         if self.approved:
@@ -124,3 +131,9 @@ class PDAInstance(models.Model):
 
     def __str__(self):
         return self.description
+
+
+class SupportingDocument(models.Model):
+    pda_record = models.ForeignKey(PDARecord, on_delete=models.CASCADE, null=False, blank=False)
+    document = models.FileField(upload_to='documents/Supporting_Documents/')
+    uploaded_at = models.DateTimeField(auto_now_add=True)

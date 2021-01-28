@@ -168,6 +168,7 @@ def myPDAdashboard(request, pk):
 @login_required(login_url='login')
 @allowed_users(allowed_roles=['admin', 'teacher'])
 def createPDA(request, pk, recId, sy):
+#if record doesn't yet exist (first entry for the school year)  it needs to be created
     if recId == "0":
         pda_record = PDARecord()
         pda_record.teacher = Teacher.objects.get(user__id=pk)
@@ -178,30 +179,49 @@ def createPDA(request, pk, recId, sy):
 
 
     pda_instance = PDAInstance.objects.filter(pda_record=pda_record)
-    formset = PDAInstanceFormSet(queryset=PDAInstance.objects.none(), instance=pda_record)
+    instanceformset = PDAInstanceFormSet(queryset=PDAInstance.objects.none(), instance=pda_record)
     record_form = PDARecordForm(instance = pda_record)
+
+    upload_form = DocumentForm()
 
     if request.method == 'POST':
         if request.POST.get('add_activity'):
-            print("activity")
-            formset = PDAInstanceFormSet(request.POST, instance=pda_record)
-            if formset.is_valid():
-                formset.save()
-                formset = PDAInstanceFormSet(queryset=PDAInstance.objects.none(), instance=pda_record)
+            instanceformset = PDAInstanceFormSet(request.POST, instance=pda_record)
+            print('right POST')
+            if instanceformset.is_valid():
+                print('form is valid')
+                instanceformset.save()
+                print('form saved')
+                instanceformset = PDAInstanceFormSet(queryset=PDAInstance.objects.none(), instance=pda_record)
 
         if request.POST.get('submit_record'):
-            print("record")
             record_form = PDARecordForm(request.POST, instance=pda_record)
             if record_form.is_valid():
                 record_form.save()
                 if is_in_group(request.user, 'teacher'):
                     return redirect('myPDAdashboard', pk=pda_record.teacher.user.id)
 
+        if request.POST.get('upload'):
+            print('got the request')
+            upload_form = DocumentForm(request.POST, request.FILES)
+            print(request.POST)
+            if upload_form.is_valid():
+                print('form is valid')
+                newdoc = SupportingDocument(document = request.FILES['docfile'], pda_record=pda_record)
+                newdoc.save()
+                print('saved')
+                #upload_form = SupportingDocumentFormSet(queryset=SupportingDocument.objects.none(), instance=pda_record)
+            else:
+                print('not valid form')
+                upload_form = DocumentForm()
+
+
     if is_in_group(request.user, 'teacher'):
         user_not_teacher = False
     else:
         user_not_teacher = True
-    context = {'user_not_teacher': user_not_teacher, 'pda_instance': pda_instance,'pda_record': pda_record, 'record_form':record_form, 'formset': formset}
+    context = dict(user_not_teacher=user_not_teacher, pda_instance=pda_instance, pda_record=pda_record,
+                   record_form=record_form, instanceformset=instanceformset, upload_form=upload_form)
     return render(request, "accounts/create_pda.html", context)
 
 
@@ -237,6 +257,17 @@ def deletePDAinstance(request, pk):
     context = {'item': pdainstance}
     return render(request, 'accounts/delete_pdainstance.html', context)
 
+def supportingdocumentupload(request):
+    if request.method == 'POST':
+        form = SupportingDocumentForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return redirect('home')
+    else:
+        form = SupportingDocumentForm()
+    return render(request, 'accounts/supporting_document_upload.html', {
+        'form': form
+    })
 
 
 
@@ -247,6 +278,7 @@ def deletePDAinstance(request, pk):
 
 
 
+#unused
 
 # all activities (for staff)
 @login_required(login_url='login')
