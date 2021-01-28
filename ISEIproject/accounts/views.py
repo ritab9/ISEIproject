@@ -168,7 +168,7 @@ def myPDAdashboard(request, pk):
 @login_required(login_url='login')
 @allowed_users(allowed_roles=['admin', 'teacher'])
 def createPDA(request, pk, recId, sy):
-#if record doesn't yet exist (first entry for the school year)  it needs to be created
+#if record doesn't yet exist (first entry for the school year)  it needs to be created, pda_record = current record
     if recId == "0":
         pda_record = PDARecord()
         pda_record.teacher = Teacher.objects.get(user__id=pk)
@@ -178,14 +178,13 @@ def createPDA(request, pk, recId, sy):
         pda_record = PDARecord.objects.get(id=recId)
 
 
-    pda_instance = PDAInstance.objects.filter(pda_record=pda_record)
-    instanceformset = PDAInstanceFormSet(queryset=PDAInstance.objects.none(), instance=pda_record)
-    record_form = PDARecordForm(instance = pda_record)
-
-    upload_form = DocumentForm()
+    pda_instance = PDAInstance.objects.filter(pda_record=pda_record) #list of already entered instances
+    instanceformset = PDAInstanceFormSet(queryset=PDAInstance.objects.none(), instance=pda_record) # entering new activity
+    record_form = PDARecordForm(instance = pda_record) #form for editing current record (summary and submission)
+    upload_form = DocumentForm() #uploading documentation
 
     if request.method == 'POST':
-        if request.POST.get('add_activity'):
+        if request.POST.get('add_activity'): #add activity and stay on page
             instanceformset = PDAInstanceFormSet(request.POST, instance=pda_record)
             print('right POST')
             if instanceformset.is_valid():
@@ -194,12 +193,13 @@ def createPDA(request, pk, recId, sy):
                 print('form saved')
                 instanceformset = PDAInstanceFormSet(queryset=PDAInstance.objects.none(), instance=pda_record)
 
-        if request.POST.get('submit_record'):
+        if request.POST.get('submit_record','update_summary'): #update summary, stay on page, submit record - go to PDAdashboard
             record_form = PDARecordForm(request.POST, instance=pda_record)
             if record_form.is_valid():
                 record_form.save()
                 if is_in_group(request.user, 'teacher'):
-                    return redirect('myPDAdashboard', pk=pda_record.teacher.user.id)
+                    if request.POST.get('submit_record'):
+                        return redirect('myPDAdashboard', pk=pda_record.teacher.user.id)
 
         if request.POST.get('upload'):
             print('got the request')
