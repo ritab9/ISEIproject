@@ -12,7 +12,6 @@ urlpatterns = [
     path('update_pdainstance/<str:pk>/', views.updatePDAinstance, name="update_pdainstance"),
     path('delete_pdainstance/<str:pk>/', views.deletePDAinstance, name="delete_pdainstance"),
 
-    path('supporting_doc_upload',views.supportingdocumentupload, name ="upload_supportingdocument"),
 
     #create PDA instances and records. View submitted PDAs
     #new record: pk - user ID, 0, sy- School-year,  #existing record: 0 recId 0 PDA record ID
@@ -32,15 +31,9 @@ urlpatterns = [
 
 #Unused
    path('teachers/', views.teachers, name="teachers"),
-    path('teacher/<str:pk>/', views.teacher, name="teacher"),
-    path('activities/create_activity/', views.createactivity, name="create_activity"),
-
-    # pk is the activity ID
-   path('activities/create_activityuser/<str:pk>/', views.createUserActivity, name="create_activityuser"),
 
 
-
-    # authentication urls
+# authentication urls
     path('', views.loginpage, name='login'),
     path('register/', views.registerpage, name='register'),
     path('login/', views.loginpage, name='login'),

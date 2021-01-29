@@ -1,4 +1,4 @@
-from django.forms import ModelForm, modelformset_factory
+from django.forms import ModelForm, modelformset_factory, ClearableFileInput
 from django.contrib.auth.forms import UserCreationForm
 from django import forms
 from django.forms.models import inlineformset_factory
@@ -35,42 +35,31 @@ class PDARecordForm(ModelForm):
     class Meta:
         model = PDARecord
         fields = ('school_year', 'date_submitted', 'summary')
-        #widgets = {
+        # widgets = {
         #    'school_year': forms.TextInput(attrs={'class': 'form-controls', 'placehoder': 'Enter school year'}),
         #    'date_submitted': forms.DateField(attrs={'class': 'form-controls', 'placehoder': 'Enter date'}),
         #    'summary': forms.Textarea(
         #        attrs={'class': 'form-controls', 'placehoder': 'Enter summary for combined activities'})
-        #}
-
-
-PDAInstanceModelFormset = modelformset_factory(
-    PDAInstance,
-    fields=('pda_type', 'date_completed', 'description', 'pages', 'clock_hours', 'ceu'),
-    widgets={}
-)
+        # }
 
 
 class PDAInstanceForm(forms.ModelForm):
     class Meta:
         model = PDAInstance
-        fields = ('pda_type', 'date_completed', 'description', 'pages', 'clock_hours', 'ceu')
-
+        fields = ('pda_type', 'date_completed', 'description', 'pages', 'clock_hours', 'ceu', 'file')
+        widgets = {
+            'file': forms.FileInput(attrs={'size': 1}),
+        }
 
 
 PDAInstanceFormSet = inlineformset_factory(PDARecord, PDAInstance, form=PDAInstanceForm, extra=1,
                                            can_delete=False)
 
-class DocumentForm(forms.Form):
+
+class DocumentForm(forms.Form): #unused but keeping it just in case
     name = forms.CharField(max_length=35, min_length=1)
     docfile = forms.FileField(
         label='Select a file',
         help_text='max. 42 megabytes'
     )
 
-
-#class SupportingDocumentForm(forms.ModelForm):
-#    class Meta:
-#       model = SupportingDocument
-#       fields = ('document', )
-
-#SupportingDocumentFormSet = inlineformset_factory(PDARecord, SupportingDocument, form=SupportingDocumentForm,can_delete=False, extra=1)

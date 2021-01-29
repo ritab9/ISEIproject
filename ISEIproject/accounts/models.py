@@ -115,7 +115,7 @@ class PDAInstance(models.Model):
     )
     approved = models.NullBooleanField(choices=CHOICES, default=None)
     approval_comment = models.CharField(max_length=300, null=True, blank=True)
-
+    file = models.FileField(upload_to='documents/Supporting_Files/', null= True, blank = True)
     class Meta:
         ordering = ['pda_record']
 
@@ -132,9 +132,3 @@ class PDAInstance(models.Model):
     def __str__(self):
         return self.description
 
-
-class SupportingDocument(models.Model):
-    pda_record = models.ForeignKey(PDARecord, on_delete=models.CASCADE, null=False, blank=False)
-    name = models.CharField(validators=[MinLengthValidator(1)], max_length=45, blank=False, null=False)
-    document = models.FileField(upload_to='documents/Supporting_Documents/')
-    uploaded_at = models.DateTimeField(auto_now_add=True)

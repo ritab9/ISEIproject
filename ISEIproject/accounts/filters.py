@@ -17,7 +17,7 @@ class PDAInstanceFilter(django_filters.FilterSet):
     )
     approved = ChoiceFilter(null_label= 'Pending', field_name='approved',label='Approved', choices = CHOICES)
 
-
+#not used yet
 class TeacherFilter(django_filters.FilterSet):
     # school = CharFilter(field_name = 'school', lookup_expr = 'icontains')
 

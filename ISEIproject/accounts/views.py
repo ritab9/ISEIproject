@@ -181,11 +181,11 @@ def createPDA(request, pk, recId, sy):
     pda_instance = PDAInstance.objects.filter(pda_record=pda_record) #list of already entered instances
     instanceformset = PDAInstanceFormSet(queryset=PDAInstance.objects.none(), instance=pda_record) # entering new activity
     record_form = PDARecordForm(instance = pda_record) #form for editing current record (summary and submission)
-    upload_form = DocumentForm() #uploading documentation
+    #upload_form = DocumentForm() #uploading documentation
 
     if request.method == 'POST':
         if request.POST.get('add_activity'): #add activity and stay on page
-            instanceformset = PDAInstanceFormSet(request.POST, instance=pda_record)
+            instanceformset = PDAInstanceFormSet(request.POST, request.FILES or None, instance=pda_record)
             if instanceformset.is_valid():
                 instanceformset.save()
                 instanceformset = PDAInstanceFormSet(queryset=PDAInstance.objects.none(), instance=pda_record)
@@ -198,26 +198,13 @@ def createPDA(request, pk, recId, sy):
                     if request.POST.get('submit_record'):
                         return redirect('myPDAdashboard', pk=pda_record.teacher.user.id)
 
-        if request.POST.get('upload'):
-            upload_form = DocumentForm(request.POST, request.FILES)
-            print('upload request')
-            print(upload_form)
-            if upload_form.is_valid():
-                print('valid form')
-                name=upload_form.cleaned_data.get('name')
-                print(name)
-                newdoc = SupportingDocument(document = request.FILES['docfile'], pda_record=pda_record, name =name)
-                newdoc.save()
-
-    documents=SupportingDocument.objects.filter(pda_record=pda_record)
 
     if is_in_group(request.user, 'teacher'):
         user_not_teacher = False
     else:
         user_not_teacher = True
     context = dict(user_not_teacher=user_not_teacher, pda_instance=pda_instance, pda_record=pda_record,
-                   record_form=record_form, instanceformset=instanceformset, upload_form=upload_form,
-                   documents = documents)
+                   record_form=record_form, instanceformset=instanceformset)
     return render(request, "accounts/create_pda.html", context)
 
 
@@ -253,41 +240,11 @@ def deletePDAinstance(request, pk):
     context = {'item': pdainstance}
     return render(request, 'accounts/delete_pdainstance.html', context)
 
-def supportingdocumentupload(request):
-    if request.method == 'POST':
-        form = SupportingDocumentForm(request.POST, request.FILES)
-        if form.is_valid():
-            form.save()
-            return redirect('home')
-    else:
-        form = SupportingDocumentForm()
-    return render(request, 'accounts/supporting_document_upload.html', {
-        'form': form
-    })
 
 
 
 
 
-
-
-
-
-
-#unused
-
-# all activities (for staff)
-@login_required(login_url='login')
-@allowed_users(allowed_roles=['admin'])
-def activities(request):
-    activities = Activity.objects.all()
-    total_activities = activities.count()
-
-    my_filter = ActivityFilter(request.GET, queryset=activities)
-    activities = my_filter.qs
-
-    context = {'activities': activities, 'total_activities': total_activities, 'my_filter': my_filter}
-    return render(request, 'accounts/activities.html', context)
 
 
 # all teachers (for staff)
@@ -304,99 +261,3 @@ def teachers(request):
     return render(request, 'accounts/teachers.html', context)
 
 
-# teacher activities for logged in user
-@login_required(login_url='login')
-@allowed_users(allowed_roles=['teacher'])
-def myactivities(request):
-    teacher = request.user.teacher
-    activities = Activity.objects.filter(teacher=teacher)
-    total_activities = activities.count()
-
-    my_filter = ActivityFilterTeacher(request.GET, queryset=activities)
-    activities = my_filter.qs
-
-    context = dict(my_filter=my_filter, teacher=teacher, activities=activities, total_activities=total_activities)
-    return render(request, 'accounts/teacher.html', context)
-
-
-# individual teacher profile (for teacher with matching pk)
-@login_required(login_url='login')
-def teacher(request, pk):
-    user = User.objects.get(id=pk)
-    teacher = Teacher.objects.get(user=user)
-    activities = Activity.objects.filter(teacher=teacher)
-    total_activities = activities.count()
-
-    my_filter = ActivityFilterTeacher(request.GET, queryset=activities)
-    activities = my_filter.qs
-
-    context = dict(myFilter=my_filter, teacher=teacher, activities=activities, total_activities=total_activities)
-    return render(request, 'accounts/teacher.html', context)
-
-
-# create activity (for staff)
-@login_required(login_url='login')
-@allowed_users(allowed_roles=['admin'])
-def createactivity(request):
-    form = ActivityForm
-    if request.method == 'POST':
-        form = ActivityForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('/')
-
-    context = {'form': form}
-    return render(request, "accounts/update_pdainstance.html", context)
-
-
-# update activity (for staff)
-@login_required(login_url='login')
-def updateActivity(request, pk):
-    activity = Activity.objects.get(id=pk)
-    form = ActivityForm(instance=activity)
-
-    if request.method == 'POST':
-        print("got POST")
-        form = ActivityForm(request.POST, instance=activity)
-        if form.is_valid():
-            print("form is valid")
-            form.save()
-            if request.user.groups.exists():
-                group = request.user.groups.all()[0].name
-                if group == 'teacher':
-                    # teacher landing page
-                    return redirect('/myactivities')
-                else:
-                    # admin landing page
-                    return redirect('/activities')
-
-    context = {'form': form}
-    return render(request, "accounts/update_pdainstance.html", context)
-
-
-# create activity (for teacher with matching pk)
-@login_required(login_url='login')
-@allowed_users(allowed_roles=['admin', 'teacher'])
-def createUserActivity(request, pk):
-    ActivityFormSet = inlineformset_factory(Teacher, Activity, exclude=('id', 'teacher'),
-                                            fields=('date', 'category', 'ceu', 'clock_Hours', 'pages', 'summary'),
-                                            extra=1)
-    user = User.objects.get(id=pk)
-    teacher = Teacher.objects.get(user=user)
-    formset = ActivityFormSet(queryset=Activity.objects.none(), instance=teacher)
-    # form = ActivityRecordForm (initial = {'teacher':teacher})
-    if request.method == 'POST':
-        formset = ActivityFormSet(request.POST, instance=teacher)
-        if formset.is_valid():
-            formset.save()
-            if request.user.groups.exists():
-                group = request.user.groups.all()[0].name
-                if group == 'teacher':
-                    # teacher landing page
-                    return redirect('/myactivities')
-                else:
-                    # admin landing page
-                    return redirect('activities')
-
-    context = {'teacher': teacher, 'formset': formset}
-    return render(request, "accounts/activityuser_form.html", context)
