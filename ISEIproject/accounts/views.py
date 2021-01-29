@@ -200,8 +200,13 @@ def createPDA(request, pk, recId, sy):
 
         if request.POST.get('upload'):
             upload_form = DocumentForm(request.POST, request.FILES)
+            print('upload request')
+            print(upload_form)
             if upload_form.is_valid():
-                newdoc = SupportingDocument(document = request.FILES['docfile'], pda_record=pda_record)
+                print('valid form')
+                name=upload_form.cleaned_data.get('name')
+                print(name)
+                newdoc = SupportingDocument(document = request.FILES['docfile'], pda_record=pda_record, name =name)
                 newdoc.save()
 
     documents=SupportingDocument.objects.filter(pda_record=pda_record)
