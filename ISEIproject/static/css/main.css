@@ -8,9 +8,10 @@ body {
 card-body{
 	backgound-color: linen;
 }
+.nav-item:active
+{color:#FFFFFF}
 
-
-.btn-default,.dropbtn
+.btn-default
 {
   background-color: #68889E;
   color:#FFF;
@@ -57,4 +58,16 @@ a {
 
 .dropdown:hover .dropdown-content {
   display: block;
+}
+
+/* Style the dropdown button to fit inside the topnav */
+.dropbtn, .dropdown {
+  font-size: 16px;
+  border: none;
+  outline: none;
+  color: gray;
+  padding: 4px 4px;
+  background-color: inherit;
+  font-family: inherit;
+  margin: 0;
 }
