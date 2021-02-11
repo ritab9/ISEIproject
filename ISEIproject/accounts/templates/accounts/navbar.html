@@ -12,11 +12,10 @@
 </style>
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-
-  <img src="{% static '/media/logo.png' %}" width="100" height="40" alt="ISEI Logo">
-  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
-  </button>
+    <img src="{% static '/media/logo.png' %}" width="100" height="40" alt="ISEI Logo">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
 
     <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav">
@@ -38,9 +37,9 @@
                 <a class="nav-link" href="{% url 'principal_dashboard' %}">Home </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="{% url 'principal_dashboard' %}">Teacher Certification</a>
+                <a class="nav-link" href="{% url 'teacher_certification' %}">Teacher Certification</a>
               </li>
-
+              <li class="nav-item dropdown">
                   <div class="dropdown">
                         <button class="dropbtn">Documents and Resources
                           <i class="fa fa-caret-down"></i>
@@ -52,7 +51,7 @@
                         </div>
                   </div>
                 <!-- <a class="nav-link" href="{% url 'principal_dashboard' %}">Documents and Resources</a> -->
-
+            </li>
               <li class="nav-item">
                     <a class="nav-link" href="{% url 'teacher_dashboard' %}">My Dashboard </a>
               </li>

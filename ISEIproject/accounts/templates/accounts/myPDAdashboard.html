@@ -37,10 +37,10 @@
                     </button>
                     <div class="dropdown-content">
                          {% for ar in active_record %}
-                            <a  href="{%  url 'create_pda' 0 ar.id 0 %}"> for {{ ar.school_year }} </a>
+                            <a  href="{%  url 'create_pda' 0 ar.id 0 %}"> for {{ ar.school_year }} active </a>
                         {% endfor %}
                             {%  for n in no_record_school_years %}
-                            <a  href="{%  url 'create_pda' teacher.user.id 0 n.id %}"> for {{ n }}</a>
+                            <a  href="{%  url 'create_pda' teacher.user.id 0 n.id %}"> for {{ n }} no record</a>
                             {% endfor %}
                     </div>
                 </div>

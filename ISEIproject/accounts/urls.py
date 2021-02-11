@@ -22,6 +22,11 @@ urlpatterns = [
     path('principaldashboard/', views.principaldashboard, name='principal_dashboard'),
     #signs the record with recID
     path('principaldashboard/<str:recID>', views.principaldashboard, name='principal_dashboard'),
+    
+    path('teachercertification/', views.teachercertification, name='teacher_certification'),
+    #signs the record with recID
+    path('teachercertification/<str:recID>', views.teachercertification, name='teacher_certification'),
+
 
 
     #admin urls
