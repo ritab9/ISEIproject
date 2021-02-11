@@ -186,17 +186,17 @@ def myPDAdashboard(request, pk):
 @allowed_users(allowed_roles=['admin', 'teacher'])
 def createPDA(request, pk, recId, sy):
 #if record doesn't yet exist (first entry for the school year)  it needs to be created, pda_record = current record
-    
-    # the problem is it tries to create the record at the activity submission as well. 
 
-        if recID==0:
-            pda_record = PDARecord()
-            pda_record.teacher = Teacher.objects.get(user__id=pk)
-            pda_record.school_year = SchoolYear.objects.get(id=sy)
-            pda_record.principal_signature = False
-            pda_record.save() 
-        else:
-            pda_record = PDARecord.objects.get(id=recId)
+    # the problem is it tries to create the record at the activity submission as well.
+
+    if recId==0:
+        pda_record = PDARecord()
+        pda_record.teacher = Teacher.objects.get(user__id=pk)
+        pda_record.school_year = SchoolYear.objects.get(id=sy)
+        pda_record.principal_signature = False
+        pda_record.save()
+    else:
+        pda_record = PDARecord.objects.get(id=recId)
 
 
     pda_instance = PDAInstance.objects.filter(pda_record=pda_record) #list of already entered instances
@@ -210,8 +210,8 @@ def createPDA(request, pk, recId, sy):
             if instanceformset.is_valid():
                 instanceformset.save()
                 instanceformset = PDAInstanceFormSet(queryset=PDAInstance.objects.none(), instance=pda_record)
-                
- 
+
+
         if request.POST.get('submit_record','update_summary'): #update summary, stay on page, submit record - go to PDAdashboard
             record_form = PDARecordForm(request.POST, instance=pda_record)
             if record_form.is_valid():
