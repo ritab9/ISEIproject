@@ -56,6 +56,10 @@
                     <a class="nav-link" href="{% url 'teacher_dashboard' %}">My Dashboard </a>
               </li>
 
+              <li class="nav-item">
+                    <a class="nav-link" href="{% url 'myPDAdashboard' request.user.id %}">My PD Activities</a>
+              </li>
+
             <li class="nav-item">
                   <a class="nav-link" href="{% url 'account_settings' %}">Settings</a>
               </li>
