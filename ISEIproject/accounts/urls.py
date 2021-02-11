@@ -14,8 +14,9 @@ urlpatterns = [
 
 
     #create PDA instances and records. View submitted PDAs
-    #new record: pk - user ID, 0, sy- School-year,  #existing record: 0 recId 0 PDA record ID
-    path('create_pda/<str:pk>/<str:recId>/<str:sy>/', views.createPDA, name='create_pda'),
+    #new record: pk - user ID, sy- School-year,  #existing record: recId - record ID
+    path('create_pda/<str:recId>/', views.createPDA, name='create_pda'),
+    path('create_record/<str:pk>/<str:sy>/', views.createrecord, name='create_record'),
 
 
     #principal urls

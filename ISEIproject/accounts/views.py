@@ -180,29 +180,33 @@ def myPDAdashboard(request, pk):
 # todo create layout in myPDAdashboard template for it to look nicer
 # todo adjust template so that it would allow for the choosing of a different teacher if user_not_teacher
 
+# create record for user and school year
+@login_required(login_url='login')
+@allowed_users(allowed_roles=['admin', 'teacher'])
+def createrecord(request, pk, sy):
+
+    pda_record = PDARecord()
+    pda_record.teacher = Teacher.objects.get(user__id=pk)
+    pda_record.school_year = SchoolYear.objects.get(id=sy)
+    pda_record.principal_signature = False
+    pda_record.save()
+
+    return redirect('create_pda', recId =pda_record.id)
+
 
 # create PDA instance + allows for record submission (for record with matching pk)
 @login_required(login_url='login')
 @allowed_users(allowed_roles=['admin', 'teacher'])
-def createPDA(request, pk, recId, sy):
-#if record doesn't yet exist (first entry for the school year)  it needs to be created, pda_record = current record
+def createPDA(request, recId):
 
-    # the problem is it tries to create the record at the activity submission as well.
-
-    if recId==0:
-        pda_record = PDARecord()
-        pda_record.teacher = Teacher.objects.get(user__id=pk)
-        pda_record.school_year = SchoolYear.objects.get(id=sy)
-        pda_record.principal_signature = False
-        pda_record.save()
-    else:
-        pda_record = PDARecord.objects.get(id=recId)
+    pda_record = PDARecord.objects.get(id=recId)
 
 
     pda_instance = PDAInstance.objects.filter(pda_record=pda_record) #list of already entered instances
     instanceformset = PDAInstanceFormSet(queryset=PDAInstance.objects.none(), instance=pda_record) # entering new activity
     record_form = PDARecordForm(instance = pda_record) #form for editing current record (summary and submission)
     #upload_form = DocumentForm() #uploading documentation
+    #helper = PDAInstanceFormSetHelper()
 
     if request.method == 'POST':
         if request.POST.get('add_activity'): #add activity and stay on page
@@ -226,7 +230,10 @@ def createPDA(request, pk, recId, sy):
     else:
         user_not_teacher = True
 
-    context = dict(user_not_teacher=user_not_teacher, pda_instance=pda_instance, pda_record=pda_record,
+    context = dict(user_not_teacher=user_not_teacher, 
+                   pda_instance=pda_instance, 
+                   #helper= helper, 
+                   pda_record=pda_record,
                    record_form=record_form, instanceformset=instanceformset)
     return render(request, "accounts/create_pda.html", context)
 
