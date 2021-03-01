@@ -32,15 +32,16 @@
             <!-- dropdowns for activity addition -->
             <div class="col-sm-2"><br>
                 <div class="dropdown">
-                    <button class="dropbtn">Add / Submit PDA
+                    <button class="dropbtn" style ="background-color: #68889E; color:#FFF;
+  border-color: #2F3E48;">Add / Submit PDA
                         <i class="fa fa-caret-down"></i>
                     </button>
                     <div class="dropdown-content">
                          {% for ar in active_record %}
-                            <a  href="{%  url 'create_pda' ar.id %}"> for {{ ar.school_year }} active </a>
+                            <a  href="{%  url 'create_pda' ar.id %}"> for {{ ar.school_year }} </a>
                         {% endfor %}
                             {%  for n in no_record_school_years %}
-                            <a  href="{%  url 'create_record' teacher.user.id n.id %}"> for {{ n }} no record</a>
+                            <a  href="{%  url 'create_record' teacher.user.id n.id %}"> for {{ n }}</a>
                             {% endfor %}
                     </div>
                 </div>
@@ -48,7 +49,8 @@
                 <!-- Comments -->
                 <div class="col">
                     <div class="card-body">
-                        An activity record for a school year is not considered submitted to ISEI until it is signed by the principal.
+                        <!--An activity record for a school year is not considered submitted to ISEI until it is signed by the principal.
+                        -->
                     </div>
                 </div>
         </div>
@@ -73,7 +75,7 @@
 					<tr>
 						<td>{{p.pda_record.school_year}} </td>
                         {% if p.pda_record.date_submitted %}
-                            <td>Pending</td>
+                            <td>To Principal</td>
                         {% else %}
                             <td style = "color:red;size:40px">Not yet</td>
                         {% endif %}
@@ -104,7 +106,8 @@
         <!-- dropdowns for activity viewing -->
         <div class="col-sm-2"><br>
             <div class="dropdown">
-                <button class="dropbtn">View PDA submitted to ISEI
+                <button class="dropbtn" style ="background-color: #68889E; color:#FFF;
+  border-color: #2F3E48;">View PDA submitted to ISEI
                     <i class="fa fa-caret-down"></i>
                 </button>
                 <div class="dropdown-content">
