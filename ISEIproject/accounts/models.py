@@ -81,7 +81,8 @@ class PDARecord(models.Model):
     # entered by teacher at object creation
     teacher = models.ForeignKey(Teacher, on_delete=models.PROTECT, null=False, blank=False)
     school_year = models.ForeignKey(SchoolYear, null=True, blank=True, on_delete=models.PROTECT)
-
+    date_submitted = models.DateField(null=True, blank=True)
+    principal_signed = models.BooleanField(null=False, default=False, blank=True)
     class Meta:
         unique_together = ('teacher', 'school_year',)
         ordering = ['school_year']
@@ -90,37 +91,48 @@ class PDARecord(models.Model):
     summary = models.CharField(validators=[MinLengthValidator(1)], max_length=3000, blank=True, null=True,
                                help_text='Summarize what you have learned from the combined activities and how you '
                                          'plan to apply this learning to your classroom')
-    date_submitted = models.DateField(null=True, blank=True)
-    # principal, after it's submitted
-    principal_signature = models.BooleanField(null=False, default=False, blank=True)
-    # ISEI admin, after signed by principal
-    total_approved_ceus = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+
 
 
 class PDAInstance(models.Model):
-    # teacher
+    # record contains teacher, school-year and summary
     pda_record = models.ForeignKey(PDARecord, on_delete=models.PROTECT, null=False, blank=False)
     pda_type = models.ForeignKey(PDAType, on_delete=models.PROTECT, null=False, blank=False)
     date_completed = models.DateField(null=False)
     description = models.CharField(validators=[MinLengthValidator(1)], max_length=3000, blank=False, null=False)
+
     # OR between those three
     ceu = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     clock_hours = models.DecimalField(max_digits=3, decimal_places=1, null=True, blank=True)
     pages = models.DecimalField(max_digits=3, decimal_places=0, null=True, blank=True)
-    # ISEI admin
-    CHOICES = (
-        ('None', 'Pending'),
-        ('True', 'Approved'),
-        ('False', 'Not Approved'),
-    )
-    approved = models.NullBooleanField(choices=CHOICES, default=None)
+
+    file = models.FileField(upload_to='documents/Supporting_Files/', null=True, blank=True)
+    date_submitted = models.DateField(null=True, blank=True)
+
+    submitted = models.BooleanField(null=False, default=False, blank=True)
+    principal_signed = models.BooleanField(null=False, default=False, blank=True)
+    isei_reviewed = models.BooleanField(null=False, default=False, blank=True)
+    approved = models.BooleanField(null=False, default=False, blank=True)
+
+    approved_ceu = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     approval_comment = models.CharField(max_length=300, null=True, blank=True)
-    file = models.FileField(upload_to='documents/Supporting_Files/', null= True, blank = True)
+
     class Meta:
         ordering = ['pda_record']
 
     @property
-    def approved_ceu(self):
+    def status(self):
+        return int(self.submitted == True) + int(self.principal_signed == True) *2 + int(self.isei_reviewed == True)*4 +int(self.approved == True) *8
+    # 0 - New instance
+    # 1 - Submitted instance
+    # 2 - Denied by the principal (submitted=0, principal_signed = 1)
+    # 3 - Signed by the principal
+    # 4 - Summary denied, whole record returned (isei_reviewed = 1, submitted = 0, principal_signed = 0)
+    # 5 - Resubmitted to principal (isei_reviewed = 1, submitted = 1, principal_signed = 0)
+    # 6 - Record approved, individual instance denied ( isei_reviewed = 1, principal_signed = 1, submitted = 0)
+    # 15 - Approved by ISEI
+
+    def suggested_ceu(self):
         if self.approved:
             if self.ceu is not None:
                 return self.ceu
