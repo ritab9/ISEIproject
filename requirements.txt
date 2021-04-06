@@ -1,0 +1,1 @@
+Created to make the app recognized by DigitalOcean
